@@ -29,11 +29,11 @@ license:             BSD-3-Clause
 license-file:        LICENSE
 
 -- The package author(s).
-author:              Your Name
+author:              Tomasz Puczel
 
 -- An email address to which users can send suggestions, bug reports, and
 -- patches.
-maintainer:          youremail@tudelft.nl
+maintainer:          t.puczel@student.tudelft.nl
 
 -- A copyright notice.
 -- copyright:
