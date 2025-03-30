@@ -88,6 +88,11 @@ ident = do x  <- lower
            xs <- many (alphanum <|> char '_')
            return (x:xs)
 
+anyIdent :: Parser String
+anyIdent = do
+            xs <- many (alphanum <|> char '_')
+            return xs
+
 nat :: Parser Int
 nat = do xs <- some digit
          return (read xs)
@@ -99,14 +104,14 @@ int = do char '-'
        <|> nat
 
 doub :: Parser Double
-doub = 
+doub =
          do
             xs <- some digit
             _ <- char '.'
             decs <- many digit
             return (read (xs ++ "." ++ decs))
       <|>
-            
+
       do
          xs <- some digit
          return (read xs)
@@ -132,6 +137,9 @@ token p = do space
 
 identifier :: Parser String
 identifier = token ident
+
+anyIdentifier :: Parser String
+anyIdentifier = token anyIdent
 
 natural :: Parser Int
 natural = token nat

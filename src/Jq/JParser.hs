@@ -50,6 +50,31 @@ parseJArray = do
                     _ <- symbol "[" 
                     _ <- symbol "]"
                     return (JArray [])
+
+parseJObject :: Parser JSON 
+parseJObject = do 
+                    _ <- symbol "{"
+                    _ <- symbol "\""
+                    k1 <- anyIdentifier 
+                    _ <- symbol "\""
+                    _ <- symbol ":"
+                    v1 <- parseJSON 
+                    elems <- many (do 
+                                        _ <- symbol ","
+                                        _ <- symbol "\""
+                                        k <- anyIdentifier
+                                        _ <- symbol "\""
+                                        _ <- symbol ":"
+                                        v <- parseJSON 
+                                        return (k,v)     
+                                )
+                    _ <- symbol "}"
+                    return (JObject ((k1, v1) : elems))
+                <|> 
+                    do 
+                        _ <- symbol "{"
+                        _ <- symbol "}"
+                        return (JObject [])
                     
                 
 
@@ -57,4 +82,4 @@ parseJArray = do
                 
     
 parseJSON :: Parser JSON
-parseJSON = token (parseJNull <|> parseJBool <|> parseJString <|> parseJNumber <|> parseJArray)
+parseJSON = token (parseJNull <|> parseJBool <|> parseJString <|> parseJNumber <|> parseJArray <|> parseJObject)
