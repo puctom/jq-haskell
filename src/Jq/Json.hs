@@ -25,7 +25,9 @@ mapInside js n =  intercalate (",\n" ++ concat (replicate n "  ")) (map show js)
 
 instance Show JSON where
   show JNull   = "null"
-  show (JNumber x)       = show x
+  show (JNumber x)  = case properFraction x of
+                      (n, 0.0) -> show (n :: Integer)  -- If there's no fractional part, show as an integer
+                      _        -> show x 
   show (JString x) = '"' : (concatMap encodeUnicode x) ++  "\""
   show (JBool x) = map toLower (show x)
   show (JArray []) = "[]"
