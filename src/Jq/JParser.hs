@@ -16,7 +16,7 @@ parseJBoolT = do    _ <- string "true"
 
 parseJBoolF :: Parser JSON
 parseJBoolF = do    _ <- string "false"
-                    return (JBool True)
+                    return (JBool False)
 parseJBool :: Parser JSON
 parseJBool = parseJBoolF <|> parseJBoolT
 
