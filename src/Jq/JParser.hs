@@ -3,7 +3,7 @@ module Jq.JParser where
 import Parsing.Parsing
 import Jq.Json
 import Jq.Utils (removeDuplicateKeys)
-import Parsing.Utils (rawNumber, escapedString)
+import Parsing.Utils (rawNumber, escapedString, stringAtom)
 
 parseJNull :: Parser JSON
 parseJNull = do _ <- string "null"
@@ -56,14 +56,14 @@ parseJObject :: Parser JSON
 parseJObject = do 
                     _ <- symbol "{"
                     _ <- symbol "\""
-                    k1 <- anyIdentifier
+                    k1 <- (many stringAtom)
                     _ <- symbol "\""
                     _ <- symbol ":"
                     v1 <- parseJSON 
                     elems <- many (do 
                                         _ <- symbol ","
                                         _ <- symbol "\""
-                                        k <- anyIdentifier
+                                        k <- many stringAtom
                                         _ <- symbol "\""
                                         _ <- symbol ":"
                                         v <- parseJSON 
