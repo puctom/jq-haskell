@@ -2,6 +2,7 @@ module Jq.JParser where
 
 import Parsing.Parsing
 import Jq.Json
+import Jq.Utils (removeDuplicateKeys)
 import Parsing.Utils (rawNumber, escapedString)
 
 parseJNull :: Parser JSON
@@ -69,7 +70,7 @@ parseJObject = do
                                         return (k,v)     
                                 )
                     _ <- symbol "}"
-                    return (JObject ((k1, v1) : elems))
+                    return (JObject (removeDuplicateKeys((k1, v1) : elems)))
                 <|> 
                     do 
                         _ <- symbol "{"
