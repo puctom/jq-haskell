@@ -70,7 +70,7 @@ parseJObject = do
                                         return (k,v)     
                                 )
                     _ <- symbol "}"
-                    return (JObject (removeDuplicateKeys((k1, v1) : elems)))
+                    return (JObject (((k1, v1) : elems)))
                 <|> 
                     do 
                         _ <- symbol "{"
