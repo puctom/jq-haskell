@@ -34,8 +34,27 @@ parseJNumber = do
                     num <- rawNumber
                     return (JNumber (read num)) 
 
+parseJArray :: Parser JSON 
+parseJArray = do 
+                    _ <- symbol "[" 
+                    e1 <- parseJSON
+                    elems <- many (do 
+                                        _ <- symbol ","
+                                        j <- parseJSON 
+                                        return j     
+                                )
+                    _ <- symbol "]"
+                    return (JArray (e1:elems))
+            <|> 
+                do 
+                    _ <- symbol "[" 
+                    _ <- symbol "]"
+                    return (JArray [])
+                    
+                
+
 
                 
     
 parseJSON :: Parser JSON
-parseJSON = token (parseJNull <|> parseJBool <|> parseJString <|> parseJNumber)
+parseJSON = token (parseJNull <|> parseJBool <|> parseJString <|> parseJNumber <|> parseJArray)
