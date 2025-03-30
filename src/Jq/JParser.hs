@@ -2,10 +2,12 @@ module Jq.JParser where
 
 import Parsing.Parsing
 import Jq.Json
+import Parsing.Utils (rawNumber, escapedString)
 
 parseJNull :: Parser JSON
 parseJNull = do _ <- string "null"
                 return JNull
+                -- alternative: JNull <$ string "null"
 
 
 parseJBoolT :: Parser JSON
@@ -19,16 +21,18 @@ parseJBool :: Parser JSON
 parseJBool = parseJBoolF <|> parseJBoolT
 
 parseJString :: Parser JSON 
-parseJString = do 
+parseJString = fmap JString escapedString
+{- parseJString = do 
                     _ <- char '"'
                     val <- (many alphanum)
                     _ <- char '"'
                     return (JString val)
+                    -}
 
 parseJNumber :: Parser JSON 
 parseJNumber = do 
-                    a <- double 
-                    return (JNumber a)
+                    num <- rawNumber
+                    return (JNumber (read num)) 
 
 
                 
