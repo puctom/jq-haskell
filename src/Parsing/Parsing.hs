@@ -85,12 +85,12 @@ string (x:xs) = do char x
 
 ident :: Parser String
 ident = do x  <- lower
-           xs <- many (alphanum <|> char '_')
+           xs <- many (alphanum <|> char '_') 
            return (x:xs)
 
 anyIdent :: Parser String
 anyIdent = do
-            xs <- many (alphanum <|> char '_')
+            xs <- many (alphanum <|> char '_') -- TODO: fix, allow for any string
             return xs
 
 nat :: Parser Int

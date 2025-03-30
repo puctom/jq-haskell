@@ -56,7 +56,7 @@ parseJObject :: Parser JSON
 parseJObject = do 
                     _ <- symbol "{"
                     _ <- symbol "\""
-                    k1 <- anyIdentifier 
+                    k1 <- anyIdentifier
                     _ <- symbol "\""
                     _ <- symbol ":"
                     v1 <- parseJSON 
@@ -70,7 +70,7 @@ parseJObject = do
                                         return (k,v)     
                                 )
                     _ <- symbol "}"
-                    return (JObject (((k1, v1) : elems)))
+                    return (JObject (removeDuplicateKeys((k1, v1) : elems)))
                 <|> 
                     do 
                         _ <- symbol "{"

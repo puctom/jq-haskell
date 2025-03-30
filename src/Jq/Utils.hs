@@ -6,7 +6,7 @@ removeDuplicateKeys entries = foldr
                         (\ (key, val) acc ->
                             if key `elem` map fst acc
                             then
-                                acc
+                                filter (\(x,_) -> x == key) acc ++ (filter (\(x,_) -> x /= key) acc)
                             else 
                                 (key, val) : acc
                         ) [] entries
