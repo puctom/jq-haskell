@@ -7,9 +7,14 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (Assertion, assertEqual, assertFailure, testCase)
 import Prelude hiding (fail)
 
+double123 :: Double
+double123 = 1.23
+
 jParserTests :: TestTree
-jParserTests = testGroup"JParser tests"[
+jParserTests = testGroup "JParser tests" [
     testCase "nullTest" $ "null" `parseTo` JNull,
+    testCase "numTest1" $ "123" `parseTo` JNumber 123 ,
+    testCase "numTest2" $ "-1.23" `parseTo` JNumber (-1.23) ,
     testCase "failure" $ fail "tnull"]
 
 parseTo :: String -> JSON -> Assertion

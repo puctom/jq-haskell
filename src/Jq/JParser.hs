@@ -17,7 +17,21 @@ parseJBoolF = do    _ <- string "false"
                     return (JBool True)
 parseJBool :: Parser JSON
 parseJBool = parseJBoolF <|> parseJBoolT
+
+parseJString :: Parser JSON 
+parseJString = do 
+                    _ <- char '"'
+                    val <- (many alphanum)
+                    _ <- char '"'
+                    return (JString val)
+
+parseJNumber :: Parser JSON 
+parseJNumber = do 
+                    a <- double 
+                    return (JNumber a)
+
+
                 
     
 parseJSON :: Parser JSON
-parseJSON = token (parseJNull <|> parseJBool )
+parseJSON = token (parseJNull <|> parseJBool <|> parseJString <|> parseJNumber)

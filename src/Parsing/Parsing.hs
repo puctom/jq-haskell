@@ -98,6 +98,26 @@ int = do char '-'
          return (-n)
        <|> nat
 
+doub :: Parser Double
+doub = 
+         do
+            xs <- some digit
+            _ <- char '.'
+            decs <- many digit
+            return (read (xs ++ "." ++ decs))
+      <|>
+            
+      do
+         xs <- some digit
+         return (read xs)
+
+doubWithSign :: Parser Double
+doubWithSign = do
+                  _ <- char '-'
+                  a <- doub
+                  return (-a)
+               <|> doub
+
 -- Handling spacing
 
 space :: Parser ()
@@ -118,6 +138,9 @@ natural = token nat
 
 integer :: Parser Int
 integer = token int
+
+double :: Parser Double
+double = token doubWithSign
 
 symbol :: String -> Parser String
 symbol xs = token (string xs)

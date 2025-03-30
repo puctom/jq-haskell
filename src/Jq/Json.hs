@@ -18,7 +18,7 @@ encodeUnicode c
   | otherwise = [c]
 
 data JSON =
-     JNull | JNumber Int | JString String | JBool Bool | JArray [JSON] | JObject [(String, JSON)]
+     JNull | JNumber Double | JString String | JBool Bool | JArray [JSON] | JObject [(String, JSON)]
 
 mapInside :: [JSON] -> Int -> String 
 mapInside js n =  intercalate (",\n" ++ concat (replicate n "  ")) (map show js)

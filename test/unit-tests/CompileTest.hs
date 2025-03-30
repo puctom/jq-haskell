@@ -11,8 +11,9 @@ import Prelude hiding (fail)
 
 compileTests :: TestTree
 compileTests = testGroup "Compile tests" [
-    testCase "identityNullTest" $ (Identity, JNull) `compileTo` [JNull], 
-    testCase "incorrectTest" $ (Identity, JNull) `compileTo` [JBool False]]
+    testCase "identityNullTest" $ (Identity, JNull) `compileTo` [JNull]
+    -- testCase "incorrectTest" $ (Identity, JNull) `compileTo` [JBool False]
+    ]
 
 compileTo :: (Filter, JSON) -> [JSON] -> Assertion
 compileTo (f, j) o = case run (compile f) j of
