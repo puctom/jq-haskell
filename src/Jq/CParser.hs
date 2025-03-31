@@ -2,6 +2,7 @@ module Jq.CParser where
 
 import Parsing.Parsing
 import Jq.Filters
+import Parsing.Utils (stringAtom)
 
 parseIdentity :: Parser Filter
 parseIdentity = do
@@ -16,11 +17,22 @@ parseParentheses = do
   return (Parentheses f)
 
 parseStringIndexing :: Parser Filter
-parseStringIndexing = do
-  _ <- space
-  _ <- char '.'
-  s <- anyIdent 
-  return (StringIndexing s)
+parseStringIndexing = 
+    do 
+    _ <- space
+    _ <- char '.'
+    _ <- symbol  "["
+    _ <- char '\"'
+    k <- (many stringAtom)
+    _ <- char '\"'
+    _ <- symbol  "]"
+    return (StringIndexing k)
+  <|> do
+    _ <- space
+    _ <- char '.'
+    k <- anyIdent 
+    return (StringIndexing k)
+
 
 
 parseFilter :: Parser Filter
