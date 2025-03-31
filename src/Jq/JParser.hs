@@ -55,7 +55,8 @@ parseJArray = do
 parseJObject :: Parser JSON 
 parseJObject = do 
                     _ <- symbol "{"
-                    _ <- symbol "\""
+                    _ <- space
+                    _ <- char '\"'
                     k1 <- (many stringAtom)
                     _ <- symbol "\""
                     _ <- symbol ":"
