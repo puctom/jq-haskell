@@ -16,6 +16,7 @@ compile (StringIndexing s) JNull = return [JNull]
 compile (Pipe f1 f2) inp = case (compile f1 inp) of
                             Right arr -> foldl (\acc val ->
                                 --          Either String [JSON], JSON
+                                -- Applies f2 to each elem of arr where arr is output of compile f1 inp
                                 do
                                     acc2 <- acc
                                     e2 <- compile f2 val
@@ -35,7 +36,7 @@ compile (Comma f1 f2) inp = do
                             -- compile f1 inp >>= (\e1 ->
                             -- compile f2 inp >>= (\e2 ->
                             --     return (e1 ++ e2)))
-
+compile (Parentheses f) inp = compile f inp 
 compile _ _ = Left "Incorrect invocation"
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]

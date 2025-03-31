@@ -8,8 +8,16 @@ parseIdentity = do
   _ <- token . char $ '.'
   return Identity
 
+parseParentheses :: Parser Filter
+parseParentheses = do
+  _ <- token (char '(')
+  f <- parseFilter
+  _ <- token (char ')')
+  return (Parentheses f)
+
+
 parseFilter :: Parser Filter
-parseFilter = parseIdentity
+parseFilter = parseIdentity <|> parseParentheses
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
