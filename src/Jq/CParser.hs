@@ -15,9 +15,16 @@ parseParentheses = do
   _ <- token (char ')')
   return (Parentheses f)
 
+parseStringIndexing :: Parser Filter
+parseStringIndexing = do
+  _ <- space
+  _ <- char '.'
+  s <- anyIdent 
+  return (StringIndexing s)
+
 
 parseFilter :: Parser Filter
-parseFilter = parseIdentity <|> parseParentheses
+parseFilter =  parseStringIndexing <|> parseParentheses <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

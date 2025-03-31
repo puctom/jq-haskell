@@ -90,8 +90,9 @@ ident = do x  <- lower
 
 anyIdent :: Parser String
 anyIdent = do
+            x <- (letter <|> char '_')
             xs <- many (alphanum <|> char '_') -- TODO: fix, allow for any string
-            return xs
+            return (x:xs)
 
 nat :: Parser Int
 nat = do xs <- some digit
