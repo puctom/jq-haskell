@@ -60,12 +60,24 @@ parseGenStringIndex =
     do 
     _ <- space
     _ <- char '.'
-    _ <- symbol  "["
+    k <- parseEscapedField
+    return (StringIndexing k)
+
+parseEscapedField :: Parser String 
+parseEscapedField = 
+  do 
+    _ <- symbol "["
     _ <- char '\"'
     k <- (many stringAtom)
     _ <- char '\"'
     _ <- symbol  "]"
-    return (StringIndexing k)
+    return k 
+  <|> 
+  do 
+    _ <- char '\"'
+    k <- (many stringAtom)
+    _ <- char '\"'
+    return k 
 
 parseSimpleStringIndex :: Parser Filter 
 parseSimpleStringIndex = 
