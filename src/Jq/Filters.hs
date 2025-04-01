@@ -7,11 +7,11 @@ data Filter = Identity
         | Parentheses Filter
 
 instance Show Filter where
-  show (Identity) = "."
-  show (StringIndexing s) = "." ++ s 
-  show (Pipe f1 f2) = (show f1) ++ " | " ++ (show f2)
-  show (Comma f1 f2) = (show f1) ++ ", " ++ (show f2)
-  show (Parentheses f) = "(" ++ (show f) ++ ")" 
+  show (Identity) = "  " ++ "FId" ++ "  "
+  show (StringIndexing s) = "  " ++ "FSIdxS(/" ++ s ++ "/FSIdxE)" ++ "  "
+  show (Pipe f1 f2) = "  " ++ "FPipeS(" ++ (show f1) ++ " | " ++ (show f2) ++ "FPipeE)" ++ "  "
+  show (Comma f1 f2) = "  " ++ "FCommaS(" ++ (show f1) ++ ", " ++ (show f2) ++ "FCommaE)" ++ "  "
+  show (Parentheses f) = "  " ++ "FParS(" ++ (show f) ++ "FParE)"  ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True
