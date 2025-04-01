@@ -6,7 +6,9 @@ data Filter = Identity
         | Comma Filter Filter 
         | Parentheses Filter
         | OptStringIndexing Filter
-        | Iterator [Filter]
+        | Iterator (Maybe Filter)
+        | Index Int
+        | Slice Int Int
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -15,7 +17,10 @@ instance Show Filter where
   show (Comma f1 f2) = "  " ++ "FCommaS(" ++ (show f1) ++ ", " ++ (show f2) ++ "FCommaE)" ++ "  "
   show (Parentheses f) = "  " ++ "FParS(" ++ (show f) ++ "FParE)"  ++ "  "
   show (OptStringIndexing f) = "  " ++ "FSIdx?S(" ++ (show f) ++ "FSIdx?E)"  ++ "  "
-  show (Iterator f) = "  " ++ "FIterS(/" ++ (concatMap show f) ++ "/FIterE)"  ++ "  "
+  show (Index k) = "  " ++ "FIdxS(/" ++ (show k) ++ "/FIdxE)" ++ "  "
+  show (Slice f1 f2) = "  " ++ "FSliceS(/" ++ (show f1) ++ " : " ++ (show f2) ++ "/FSliceE)" ++ "  "
+  show (Iterator Nothing) = "  " ++ "FIterS(/" ++ ".[]" ++ "/FIterE)"  ++ "  "
+  show (Iterator (Just f)) = "  " ++ "FIterS(/" ++ ".[ " ++ (show f) ++ " ]" ++ "/FIterE)"  ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True
@@ -23,6 +28,10 @@ instance Eq Filter where
   (Pipe f1 f2) == (Pipe f1' f2') = (f1 == f1') && (f2 == f2')
   (Comma f1 f2) == (Comma f1' f2') = (f1 == f1') && (f2 == f2')
   (OptStringIndexing f) == (OptStringIndexing f')  = f == f'
+  (Parentheses f) == (Parentheses f') = f == f'
+  (Index k) == (Index k') = k == k'
+  (Slice f1 f2) == (Slice f1' f2') = (f1 == f1') && (f2 == f2')
+  (Iterator f) == (Iterator f') = f == f'
   _ == _ = False
 
 

@@ -90,7 +90,7 @@ parsePipe =
       f2 <- parseSimpleStringIndex
       return (Pipe f1 f2)
 
-parseComma :: Parser Filter
+parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
 parseComma = 
     do 
       f1 <- parsePipeLevel -- level down 
@@ -98,15 +98,44 @@ parseComma =
       f2 <- parseFilter -- all 
       return (Comma f1 f2)
 
-
-parseIterator :: Parser Filter 
-parseIterator = 
+parseNonEmptyIterator :: Parser Filter 
+parseNonEmptyIterator = 
     do 
       _ <- symbol "."
       _ <- symbol "["
+      f <- parseFilter <|> parseIndex
       _ <- symbol "]"
-      return (Iterator [])
+      return (Iterator (Just f))
 
+parseEmptyIterator :: Parser Filter 
+parseEmptyIterator = 
+    do 
+      _ <- symbol "."
+      _ <- symbol "["
+      _ <- space
+      _ <- symbol "]"
+      return (Iterator Nothing)
+
+parseIndex :: Parser Filter 
+parseIndex = 
+    do 
+      k <- integer
+      return (Index k)
+
+parseSlice :: Parser Filter 
+parseSlice = 
+    do 
+      _ <- symbol "."
+      _ <- symbol "["
+      f1 <- integer -- can it be all filters???
+      _ <- symbol ":"
+      f2 <- integer
+      _ <- symbol "]"
+      return (Slice f1 f2)
+
+
+parseIterator :: Parser Filter
+parseIterator = parseNonEmptyIterator <|> parseEmptyIterator
 
 parseFilter :: Parser Filter
 parseFilter =  parseComma <|> parsePipeLevel
@@ -115,7 +144,7 @@ parsePipeLevel :: Parser Filter
 parsePipeLevel =  parsePipe <|> parseNonPipe  
 
 parseNonPipe :: Parser Filter 
-parseNonPipe = parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIdentity
+parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

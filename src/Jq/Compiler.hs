@@ -3,15 +3,23 @@ module Jq.Compiler where
 import           Jq.Filters
 import           Jq.Json
 
-
 type JProgram a = JSON -> Either String a
 
 compile :: Filter -> JProgram [JSON]
 compile Identity inp = return [inp]
-compile (Iterator []) (JArray arr) = return arr
-compile (Iterator []) (JObject obj) = return (map snd obj)
+-- compile (Index k) _ = Left "Index should only be used inside of array iterator" -- technically should not occur, right? Index should only be used inside of array iterator
+compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where
+        k1' = if k1 < 0 then k1 + (length arr) else k1
+        k2' = if k2 < 0 then k2 + (length arr) else k2
+compile (Iterator (Just (Index k))) (JArray arr)
+    | k >= length arr = return [JNull]
+    | k >= 0 = return [arr !! k ] -- just element at position k
+    | k >= -(length arr) = return [arr !! (k + length arr) ]
+    | otherwise = return [JNull] -- too much negative
+compile (Iterator Nothing) (JArray arr) = return arr
+compile (Iterator Nothing) (JObject obj) = return (map snd obj)
 compile (OptStringIndexing s) (JObject a) = compile s (JObject a) -- TODO: would be better not to recreate JObject
-compile (OptStringIndexing _) _ = return [] 
+compile (OptStringIndexing _) _ = return []
 compile (StringIndexing s) (JObject a) = case map snd (filter (\(key, val) -> key == s) a) of
                                             [] -> return [JNull]
                                             xs -> return xs
@@ -40,7 +48,7 @@ compile (Comma f1 f2) inp = do
                             -- compile f1 inp >>= (\e1 ->
                             -- compile f2 inp >>= (\e2 ->
                             --     return (e1 ++ e2)))
-compile (Parentheses f) inp = compile f inp 
+compile (Parentheses f) inp = compile f inp
 compile _ _ = Left "Incorrect invocation"
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
