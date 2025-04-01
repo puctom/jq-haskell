@@ -47,7 +47,7 @@ parseStringIndexing :: Parser Filter
 parseStringIndexing = parseOptionalStringIndexing <|> parseNonOptionalStringIndexing
 
 parseNonOptionalStringIndexing :: Parser Filter
-parseNonOptionalStringIndexing = parseGenStringIndex <|> parseSimpleStringIndex
+parseNonOptionalStringIndexing = parseGenStringIndex <|> parseHalfGenStringIndex <|> parseSimpleStringIndex
 
 parseOptionalStringIndexing :: Parser Filter 
 parseOptionalStringIndexing = do 
@@ -60,24 +60,25 @@ parseGenStringIndex =
     do 
     _ <- space
     _ <- char '.'
-    k <- parseEscapedField
-    return (StringIndexing k)
-
-parseEscapedField :: Parser String 
-parseEscapedField = 
-  do 
     _ <- symbol "["
     _ <- char '\"'
     k <- (many stringAtom)
     _ <- char '\"'
     _ <- symbol  "]"
-    return k 
-  <|> 
-  do 
+    return (StringIndexing k)
+
+parseHalfGenStringIndex :: Parser Filter 
+parseHalfGenStringIndex =
+    do 
+    _ <- space
+    _ <- char '.'
     _ <- char '\"'
     k <- (many stringAtom)
     _ <- char '\"'
-    return k 
+    return (StringIndexing k)
+  <|> 
+    parseSimpleStringIndex
+
 
 parseSimpleStringIndex :: Parser Filter 
 parseSimpleStringIndex = 
@@ -95,11 +96,21 @@ parsePipe =
       _ <- token (char '|')
       f2 <- parseFilter -- all OR same level
       return (Pipe f1 f2)
-    <|> 
+    <|> parseStringPipe
+
+
+parseStringPipe :: Parser Filter 
+parseStringPipe =
     do 
       f1 <- parseStringIndexing
       _ <- space 
-      f2 <- parseSimpleStringIndex
+      f2 <- parseStringPipe
+      return (Pipe f1 f2)
+    <|> 
+    do
+      f1 <- parseStringIndexing
+      _ <- space 
+      f2 <- parseHalfGenStringIndex
       return (Pipe f1 f2)
 
 parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
