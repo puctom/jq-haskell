@@ -77,7 +77,7 @@ parsePipe =
       return (Pipe f1 f2)
     <|> 
     do 
-      f1 <- parseSimpleStringIndex
+      f1 <- parseStringIndexing
       _ <- space 
       f2 <- parseSimpleStringIndex
       return (Pipe f1 f2)
