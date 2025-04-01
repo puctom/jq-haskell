@@ -19,7 +19,8 @@ compile (Iterator (Just (Index k))) (JArray arr)
     | k >= -(length arr) = return [arr !! (k + length arr) ]
     | otherwise = return [JNull] -- too much negative
 compile (OptIterator f) (JArray arr) = compile f (JArray arr)
-compile (OptIterator _f) _ = return []
+compile (OptIterator (Iterator Nothing)) (JObject obj) = compile (Iterator Nothing) (JObject obj)
+compile (OptIterator _) _ = return []
 compile (Iterator Nothing) (JArray arr) = return arr
 compile (Iterator Nothing) (JObject obj) = return (map snd obj)
 compile (OptStringIndexing s) (JObject a) = compile s (JObject a) -- TODO: would be better not to recreate JObject
