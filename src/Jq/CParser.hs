@@ -122,8 +122,11 @@ parseIndex =
       k <- integer
       return (Index k)
 
-parseSlice :: Parser Filter 
-parseSlice = 
+parseSlice :: Parser Filter
+parseSlice = parseOptSlice <|> parseNonOptSlice
+
+parseNonOptSlice :: Parser Filter 
+parseNonOptSlice = 
     do 
       _ <- symbol "."
       _ <- symbol "["
@@ -133,9 +136,26 @@ parseSlice =
       _ <- symbol "]"
       return (Slice f1 f2)
 
+parseOptSlice :: Parser Filter 
+parseOptSlice = 
+  do
+    f <- parseNonOptSlice
+    _ <- char '?'
+    return (OptSlice f)
+
+
+parseNonOptIterator :: Parser Filter
+parseNonOptIterator = parseNonEmptyIterator <|> parseEmptyIterator
+
+parseOptIterator :: Parser Filter
+parseOptIterator = 
+  do
+    f <- parseNonEmptyIterator <|> parseEmptyIterator
+    _ <- char '?'
+    return (OptIterator f)
 
 parseIterator :: Parser Filter
-parseIterator = parseNonEmptyIterator <|> parseEmptyIterator
+parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
 
 parseFilter :: Parser Filter
 parseFilter =  parseComma <|> parsePipeLevel

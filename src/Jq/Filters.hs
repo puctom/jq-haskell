@@ -1,14 +1,16 @@
 module Jq.Filters where
 
-data Filter = Identity 
-        | StringIndexing String 
-        | Pipe Filter Filter 
-        | Comma Filter Filter 
+data Filter = Identity
+        | StringIndexing String
+        | Pipe Filter Filter
+        | Comma Filter Filter
         | Parentheses Filter
         | OptStringIndexing Filter
         | Iterator (Maybe Filter)
+        | OptIterator Filter
         | Index Int
         | Slice Int Int
+        | OptSlice Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -19,12 +21,13 @@ instance Show Filter where
   show (OptStringIndexing f) = "  " ++ "FSIdx?S(" ++ (show f) ++ "FSIdx?E)"  ++ "  "
   show (Index k) = "  " ++ "FIdxS(/" ++ (show k) ++ "/FIdxE)" ++ "  "
   show (Slice f1 f2) = "  " ++ "FSliceS(/" ++ (show f1) ++ " : " ++ (show f2) ++ "/FSliceE)" ++ "  "
+  show (OptSlice f1) = "  " ++ "FSlice?S(/" ++ (show f1) ++ "/FSliceE)" ++ "  "
   show (Iterator Nothing) = "  " ++ "FIterS(/" ++ ".[]" ++ "/FIterE)"  ++ "  "
   show (Iterator (Just f)) = "  " ++ "FIterS(/" ++ ".[ " ++ (show f) ++ " ]" ++ "/FIterE)"  ++ "  "
-
+  show (OptIterator f) = "  " ++ "FIter?S(/" ++ show f ++ "/FIterE)"  ++ "  "
 instance Eq Filter where
   Identity == Identity = True
-  (StringIndexing s1) == (StringIndexing s2) = s1 == s2 
+  (StringIndexing s1) == (StringIndexing s2) = s1 == s2
   (Pipe f1 f2) == (Pipe f1' f2') = (f1 == f1') && (f2 == f2')
   (Comma f1 f2) == (Comma f1' f2') = (f1 == f1') && (f2 == f2')
   (OptStringIndexing f) == (OptStringIndexing f')  = f == f'
@@ -32,6 +35,8 @@ instance Eq Filter where
   (Index k) == (Index k') = k == k'
   (Slice f1 f2) == (Slice f1' f2') = (f1 == f1') && (f2 == f2')
   (Iterator f) == (Iterator f') = f == f'
+  (OptIterator f) == (OptIterator f') = f == f'
+  (OptSlice f1) == (OptSlice f1' ) = f1 == f1'
   _ == _ = False
 
 

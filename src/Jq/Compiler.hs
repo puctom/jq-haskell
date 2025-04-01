@@ -11,11 +11,15 @@ compile Identity inp = return [inp]
 compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where
         k1' = if k1 < 0 then k1 + (length arr) else k1
         k2' = if k2 < 0 then k2 + (length arr) else k2
+compile (OptSlice f) (JArray arr) = compile f (JArray arr)
+compile (OptSlice _) _ = return []
 compile (Iterator (Just (Index k))) (JArray arr)
     | k >= length arr = return [JNull]
     | k >= 0 = return [arr !! k ] -- just element at position k
     | k >= -(length arr) = return [arr !! (k + length arr) ]
     | otherwise = return [JNull] -- too much negative
+compile (OptIterator f) (JArray arr) = compile f (JArray arr)
+compile (OptIterator _f) _ = return []
 compile (Iterator Nothing) (JArray arr) = return arr
 compile (Iterator Nothing) (JObject obj) = return (map snd obj)
 compile (OptStringIndexing s) (JObject a) = compile s (JObject a) -- TODO: would be better not to recreate JObject
