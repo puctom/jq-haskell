@@ -45,7 +45,16 @@ parseParentheses = do
   return (Parentheses f)
 
 parseStringIndexing :: Parser Filter
-parseStringIndexing = parseGenStringIndex <|> parseSimpleStringIndex
+parseStringIndexing = parseOptionalStringIndexing <|> parseNonOptionalStringIndexing
+
+parseNonOptionalStringIndexing :: Parser Filter
+parseNonOptionalStringIndexing = parseGenStringIndex <|> parseSimpleStringIndex
+
+parseOptionalStringIndexing :: Parser Filter 
+parseOptionalStringIndexing = do 
+    f <- parseNonOptionalStringIndexing
+    _ <- char '?'
+    return (OptStringIndexing f)
 
 parseGenStringIndex :: Parser Filter 
 parseGenStringIndex =

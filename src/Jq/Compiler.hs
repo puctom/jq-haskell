@@ -8,11 +8,13 @@ type JProgram a = JSON -> Either String a
 
 compile :: Filter -> JProgram [JSON]
 compile Identity inp = return [inp]
+compile (OptStringIndexing s) (JObject a) = compile s (JObject a) -- TODO: would be better not to recreate JObject
+compile (OptStringIndexing _) _ = return [] -- TODO: would be better not to recreate JObject
 compile (StringIndexing s) (JObject a) = case map snd (filter (\(key, val) -> key == s) a) of
                                             [] -> return [JNull]
                                             xs -> return xs
-compile (StringIndexing s) JNull = return [JNull]
-
+compile (StringIndexing _) JNull = return [JNull]
+compile (StringIndexing _) x = Left ("Cannot string-index " ++ show x)
 compile (Pipe f1 f2) inp = case (compile f1 inp) of
                             Right arr -> foldl (\acc val ->
                                 --          Either String [JSON], JSON

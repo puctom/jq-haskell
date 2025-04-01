@@ -5,6 +5,7 @@ data Filter = Identity
         | Pipe Filter Filter 
         | Comma Filter Filter 
         | Parentheses Filter
+        | OptStringIndexing Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -12,13 +13,14 @@ instance Show Filter where
   show (Pipe f1 f2) = "  " ++ "FPipeS(" ++ (show f1) ++ " | " ++ (show f2) ++ "FPipeE)" ++ "  "
   show (Comma f1 f2) = "  " ++ "FCommaS(" ++ (show f1) ++ ", " ++ (show f2) ++ "FCommaE)" ++ "  "
   show (Parentheses f) = "  " ++ "FParS(" ++ (show f) ++ "FParE)"  ++ "  "
+  show (OptStringIndexing f) = "  " ++ "FSIdx?S(" ++ (show f) ++ "FSIdx?E)"  ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True
   (StringIndexing s1) == (StringIndexing s2) = s1 == s2 
   (Pipe f1 f2) == (Pipe f1' f2') = (f1 == f1') && (f2 == f2')
   (Comma f1 f2) == (Comma f1' f2') = (f1 == f1') && (f2 == f2')
-  (Parentheses f) == (Parentheses f')  = f == f'
+  (OptStringIndexing f) == (OptStringIndexing f')  = f == f'
   _ == _ = False
 
 
