@@ -1,4 +1,5 @@
 module Jq.Filters where
+import Jq.Json (JSON)
 
 data Filter = Identity
         | StringIndexing String
@@ -11,6 +12,7 @@ data Filter = Identity
         | Index Int
         | Slice Int Int
         | OptSlice Filter
+        | ValConstr JSON
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -25,6 +27,7 @@ instance Show Filter where
   show (Iterator Nothing) = "  " ++ "FIterS(/" ++ ".[]" ++ "/FIterE)"  ++ "  "
   show (Iterator (Just f)) = "  " ++ "FIterS(/" ++ ".[ " ++ (show f) ++ " ]" ++ "/FIterE)"  ++ "  "
   show (OptIterator f) = "  " ++ "FIter?S(/" ++ show f ++ "/FIterE)"  ++ "  "
+  show (ValConstr j) = " json: " ++ show j ++ "  "
 instance Eq Filter where
   Identity == Identity = True
   (StringIndexing s1) == (StringIndexing s2) = s1 == s2

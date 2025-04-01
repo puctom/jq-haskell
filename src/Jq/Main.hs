@@ -23,7 +23,7 @@ process args json = do
   -- convert Maybe to Either, adding an error message
   obj <- maybe (Left "Couldn't parse JSON") Right $ parse parseJSON json
   -- you can modify the type of `compile` to output a compilation error too
-  let program = compile . filters $ v
+  let program = compileTrace (filters v)  -- MODIFIED TEMPLATE
   -- prepend the execution error with an explanation
   res <- left ("Couldn't execute the program: " ++) $ run program obj
   -- convert all JSON output objects to String

@@ -2,10 +2,15 @@ module Jq.Compiler where
 
 import           Jq.Filters
 import           Jq.Json
+import Debug.Trace (trace)
 
 type JProgram a = JSON -> Either String a
 
+compileTrace :: Filter -> JProgram [JSON]
+compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
+
 compile :: Filter -> JProgram [JSON]
+compile (ValConstr v) inp = return [v]
 compile Identity inp = return [inp]
 -- compile (Index k) _ = Left "Index should only be used inside of array iterator" -- technically should not occur, right? Index should only be used inside of array iterator
 compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where
@@ -16,34 +21,34 @@ compile (Index k) (JArray arr)
     | k >= 0 = return [arr !! k ] -- just element at position k
     | k >= -(length arr) = return [arr !! (k + length arr) ]
     | otherwise = return [JNull] -- too much negative
-compile (Index k) _ = Left "Cannot apply index to non-arary"
-compile (OptSlice f) (JArray arr) = compile f (JArray arr)
+compile (Index _) _ = Left "Cannot apply index to non-arary"
+compile (OptSlice f) (JArray arr) = compileTrace f (JArray arr)
 compile (OptSlice _) _ = return []
 -- compile (Iterator (Just (Index k))) (JArray arr) - REPLACED
 --     | k >= length arr = return [JNull]
 --     | k >= 0 = return [arr !! k ] -- just element at position k
 --     | k >= -(length arr) = return [arr !! (k + length arr) ]
 --     | otherwise = return [JNull] -- too much negative
-compile (OptIterator f) (JArray arr) = compile f (JArray arr)
-compile (OptIterator (Iterator Nothing)) (JObject obj) = compile (Iterator Nothing) (JObject obj)
+compile (OptIterator f) (JArray arr) = compileTrace f (JArray arr)
+compile (OptIterator (Iterator Nothing)) (JObject obj) = compileTrace (Iterator Nothing) (JObject obj)
 compile (OptIterator _) _ = return []
 compile (Iterator Nothing) (JArray arr) = return arr
-compile (Iterator (Just f)) (JArray arr) = compile f (JArray arr)
+compile (Iterator (Just f)) (JArray arr) = compileTrace f (JArray arr)
 compile (Iterator Nothing) (JObject obj) = return (map snd obj)
-compile (OptStringIndexing s) (JObject a) = compile s (JObject a) -- TODO: would be better not to recreate JObject
+compile (OptStringIndexing s) (JObject a) = compileTrace s (JObject a) -- TODO: would be better not to recreate JObject
 compile (OptStringIndexing _) _ = return []
 compile (StringIndexing s) (JObject a) = case map snd (filter (\(key, val) -> key == s) a) of
                                             [] -> return [JNull]
                                             xs -> return xs
 compile (StringIndexing _) JNull = return [JNull]
 compile (StringIndexing _) x = Left ("Cannot string-index " ++ show x)
-compile (Pipe f1 f2) inp = case (compile f1 inp) of
+compile (Pipe f1 f2) inp = case (compileTrace f1 inp) of
                             Right arr -> foldl (\acc val ->
                                 --          Either String [JSON], JSON
                                 -- Applies f2 to each elem of arr where arr is output of compile f1 inp
                                 do
                                     acc2 <- acc
-                                    e2 <- compile f2 val
+                                    e2 <- compileTrace f2 val
                                     return (acc2 ++ e2)
 
                                 -- case acc of
@@ -54,13 +59,13 @@ compile (Pipe f1 f2) inp = case (compile f1 inp) of
                                                                 ) (Right []) arr
                             Left x -> Left x
 compile (Comma f1 f2) inp = do
-                                e1 <- compile f1 inp
-                                e2 <- compile f2 inp
+                                e1 <- compileTrace f1 inp
+                                e2 <- compileTrace f2 inp
                                 return (e1 ++ e2)
                             -- compile f1 inp >>= (\e1 ->
                             -- compile f2 inp >>= (\e2 ->
                             --     return (e1 ++ e2)))
-compile (Parentheses f) inp = compile f inp
+compile (Parentheses f) inp = compileTrace f inp
 compile _ _ = Left "Incorrect invocation"
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]

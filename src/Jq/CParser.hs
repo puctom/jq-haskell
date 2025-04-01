@@ -4,6 +4,7 @@ import Parsing.Parsing
 import Jq.Filters
 import Parsing.Utils (stringAtom)
 import Debug.Trace (trace)
+import Jq.JParser (parseJSON)
 
 
 {-
@@ -177,6 +178,13 @@ parseOptIterator =
     _ <- char '?'
     return (OptIterator f)
 
+parseValConstr :: Parser Filter 
+parseValConstr = 
+  do
+    j <- parseJSON
+    return (ValConstr j)
+
+
 parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
 
@@ -187,7 +195,7 @@ parsePipeLevel :: Parser Filter
 parsePipeLevel =  parsePipe <|> parseNonPipe  
 
 parseNonPipe :: Parser Filter 
-parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIndex <|> parseIdentity
+parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIndex <|> parseIdentity <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
