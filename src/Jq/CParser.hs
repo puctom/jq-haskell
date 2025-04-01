@@ -195,7 +195,7 @@ parsePipeLevel :: Parser Filter
 parsePipeLevel =  parsePipe <|> parseNonPipe  
 
 parseNonPipe :: Parser Filter 
-parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIndex <|> parseIdentity <|> parseValConstr
+parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIndex <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
