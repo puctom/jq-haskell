@@ -6,6 +6,7 @@ data Filter = Identity
         | Comma Filter Filter 
         | Parentheses Filter
         | OptStringIndexing Filter
+        | Iterator [Filter]
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -14,6 +15,7 @@ instance Show Filter where
   show (Comma f1 f2) = "  " ++ "FCommaS(" ++ (show f1) ++ ", " ++ (show f2) ++ "FCommaE)" ++ "  "
   show (Parentheses f) = "  " ++ "FParS(" ++ (show f) ++ "FParE)"  ++ "  "
   show (OptStringIndexing f) = "  " ++ "FSIdx?S(" ++ (show f) ++ "FSIdx?E)"  ++ "  "
+  show (Iterator f) = "  " ++ "FIterS(/" ++ (concatMap show f) ++ "/FIterE)"  ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True

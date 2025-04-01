@@ -8,8 +8,10 @@ type JProgram a = JSON -> Either String a
 
 compile :: Filter -> JProgram [JSON]
 compile Identity inp = return [inp]
+compile (Iterator []) (JArray arr) = return arr
+compile (Iterator []) (JObject obj) = return (map snd obj)
 compile (OptStringIndexing s) (JObject a) = compile s (JObject a) -- TODO: would be better not to recreate JObject
-compile (OptStringIndexing _) _ = return [] -- TODO: would be better not to recreate JObject
+compile (OptStringIndexing _) _ = return [] 
 compile (StringIndexing s) (JObject a) = case map snd (filter (\(key, val) -> key == s) a) of
                                             [] -> return [JNull]
                                             xs -> return xs

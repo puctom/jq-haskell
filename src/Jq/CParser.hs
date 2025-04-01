@@ -31,7 +31,6 @@ def … ; … 	Function expression
 
 -}
 
-
 parseIdentity :: Parser Filter
 parseIdentity = do
   _ <- token . char $ '.'
@@ -100,6 +99,15 @@ parseComma =
       return (Comma f1 f2)
 
 
+parseIterator :: Parser Filter 
+parseIterator = 
+    do 
+      _ <- symbol "."
+      _ <- symbol "["
+      _ <- symbol "]"
+      return (Iterator [])
+
+
 parseFilter :: Parser Filter
 parseFilter =  parseComma <|> parsePipeLevel
 
@@ -107,7 +115,7 @@ parsePipeLevel :: Parser Filter
 parsePipeLevel =  parsePipe <|> parseNonPipe  
 
 parseNonPipe :: Parser Filter 
-parseNonPipe = parseStringIndexing <|> parseParentheses <|> parseIdentity
+parseNonPipe = parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIdentity
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
