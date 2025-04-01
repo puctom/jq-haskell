@@ -56,7 +56,7 @@ parseJObject :: Parser JSON
 parseJObject = do 
                     _ <- symbol "{"
                     _ <- space
-                    _ <- char '\"'
+                    _ <- char '\"' -- apparently can be without it 
                     k1 <- (many stringAtom)
                     _ <- symbol "\""
                     _ <- symbol ":"

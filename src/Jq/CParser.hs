@@ -65,6 +65,7 @@ parseSimpleStringIndex =
     _ <- space
     _ <- char '.'
     k <- anyIdent 
+    _ <- space
     return (StringIndexing k)
 
 parsePipe :: Parser Filter
