@@ -116,7 +116,7 @@ prettifyJSON s = do
 createTestInstance :: Program -> JTestInstance -> TestTree
 createTestInstance program t = localOption (mkTimeout 10000000) $ testCase name res
   where
-    name = "filter: `" ++ p ++ "`\tinput: `" ++ i ++ "`"
+    name = "filter: `" ++ p ++ "`\n\t\tinput: `" ++ i ++ "`"
     JTestInstance p i o = t
     res = do
       (exitcode, out) <- program p i

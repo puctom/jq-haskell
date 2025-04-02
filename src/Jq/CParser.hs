@@ -123,6 +123,15 @@ parseStringPipe =
       f2 <- parseOptHalfGenStringIndex <|> parseHalfGenStringIndex
       return (Pipe f1 f2)
 
+parseCommaIndexing :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
+parseCommaIndexing = 
+    do 
+      f1 <- parseIndex -- level down 
+      _ <- token (char ',')
+      f2 <- parseCommaIndexing -- all 
+      return (Comma f1 f2)
+    <|> parseIndex
+
 parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
 parseComma = 
     do 
@@ -136,7 +145,7 @@ parseNonEmptyIterator =
     do 
       _ <- symbol "."
       _ <- symbol "["
-      f <- parseFilter <|> parseIndex -- TODO: here should more generic
+      f <- parseCommaIndexing -- parseFilter <|> parseIndex -- TODO: here should more generic
       _ <- symbol "]"
       return (Iterator (Just f))
    
@@ -188,12 +197,6 @@ parseOptIterator =
     _ <- char '?'
     return (OptIterator f)
 
--- parseValConstr :: Parser Filter 
--- parseValConstr = 
---   j <- SimpleValConstr JSON 
---         | ObjValConstr [(String, Filter)] 
---         | ArrValConst Filter
-
 parseSimpleVal :: Parser Filter 
 parseSimpleVal = 
   do
@@ -214,7 +217,7 @@ parseArrayVal = do
 
 
 parseValConstr :: Parser Filter 
-parseValConstr = parseSimpleVal
+parseValConstr = parseSimpleVal <|> parseArrayVal
 
 parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
@@ -226,7 +229,7 @@ parsePipeLevel :: Parser Filter
 parsePipeLevel =  parsePipe <|> parseNonPipe  
 
 parseNonPipe :: Parser Filter 
-parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseIdentity -- <|> parseValConstr
+parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|>  parseValConstr <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

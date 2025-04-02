@@ -12,8 +12,8 @@ compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show
 compile :: Filter -> JProgram [JSON]
 -- compile (ValConstr v) inp = return [v]
 compile (SimpleValConstr j) _ = return [j]
-compile (ArrValConst Nothing) inp = return []
-compile (ArrValConst (Just a)) inp = compile a inp
+compile (ArrValConst Nothing) _ = return []
+compile (ArrValConst (Just a)) inp = (compile a inp) >>= (\resultJsonArray -> return [JArray (resultJsonArray)] )
 compile Identity inp = return [inp]
 compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where
         k1' = if k1 < 0 then k1 + (length arr) else k1
@@ -38,6 +38,7 @@ compile (Iterator Nothing) (JArray arr) = return arr
 compile (Iterator (Just f)) (JArray arr) = compileTrace f (JArray arr)
 compile (Iterator Nothing) (JObject obj) = return (map snd obj)
 compile (OptStringIndexing s) (JObject a) = compileTrace s (JObject a) -- TODO: would be better not to recreate JObject
+compile (OptStringIndexing _) JNull = return [JNull]
 compile (OptStringIndexing _) _ = return []
 compile (StringIndexing s) (JObject a) = case map snd (filter (\(key, val) -> key == s) a) of
                                             [] -> return [JNull]
