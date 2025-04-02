@@ -10,7 +10,7 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
-compile (ValConstr v) inp = return [v]
+-- compile (ValConstr v) inp = return [v]
 compile Identity inp = return [inp]
 -- compile (Index k) _ = Left "Index should only be used inside of array iterator" -- technically should not occur, right? Index should only be used inside of array iterator
 compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where

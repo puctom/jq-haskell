@@ -186,11 +186,11 @@ parseOptIterator =
     _ <- char '?'
     return (OptIterator f)
 
-parseValConstr :: Parser Filter 
-parseValConstr = 
-  do
-    j <- parseJSON
-    return (ValConstr j)
+-- parseValConstr :: Parser Filter 
+-- parseValConstr = 
+--   do
+--     j <- parseJSON
+--     return (ValConstr j)
 
 
 parseIterator :: Parser Filter

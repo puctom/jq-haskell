@@ -32,7 +32,7 @@ instance Show JSON where
   show (JBool x) = map toLower (show x)
   show (JArray []) = "[]"
   show (JArray js) =  "[\n  " ++ (mapInside js 1)  ++ "\n]" -- fix nesting
-  show (JObject entries) = "{" ++ intercalate ", " (map (\(x, y) -> (show x) ++ ": " ++ (show y)) entries) ++ "}"
+  show (JObject entries) = "{" ++ intercalate ", " (map (\(x, y) -> '"' :(concatMap encodeUnicode x) ++"\"" ++ ": " ++ (show y)) entries) ++ "}"
 
 
 instance Eq JSON where

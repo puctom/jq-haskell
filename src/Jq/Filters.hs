@@ -12,7 +12,7 @@ data Filter = Identity
         | Index Int
         | Slice Int Int
         | OptSlice Filter
-        | ValConstr JSON
+        | ValConstr Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
