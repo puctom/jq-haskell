@@ -68,6 +68,14 @@ parseGenStringIndex =
     _ <- symbol  "]"
     return (StringIndexing k)
 
+parseOptHalfGenStringIndex :: Parser Filter 
+parseOptHalfGenStringIndex = 
+  do 
+    f <- parseHalfGenStringIndex
+    _ <- char '?'
+    return (OptStringIndexing f)
+
+
 parseHalfGenStringIndex :: Parser Filter 
 parseHalfGenStringIndex =
     do 
@@ -111,7 +119,7 @@ parseStringPipe =
     do
       f1 <- parseStringIndexing
       _ <- space 
-      f2 <- parseHalfGenStringIndex
+      f2 <- parseOptHalfGenStringIndex <|> parseHalfGenStringIndex
       return (Pipe f1 f2)
 
 parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
@@ -127,7 +135,7 @@ parseNonEmptyIterator =
     do 
       _ <- symbol "."
       _ <- symbol "["
-      f <- parseFilter <|> parseIndex
+      f <- parseFilter -- <|> parseIndex
       _ <- symbol "]"
       return (Iterator (Just f))
 
