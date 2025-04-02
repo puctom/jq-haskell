@@ -169,7 +169,10 @@ parseSlice :: Parser Filter
 parseSlice = parseOptSlice <|> parseNonOptSlice
 
 parseNonOptSlice :: Parser Filter 
-parseNonOptSlice = 
+parseNonOptSlice = parseSliceTwoInt <|> parseSliceFirstInt <|> parseSliceSecondInt
+
+parseSliceTwoInt :: Parser Filter 
+parseSliceTwoInt = 
     do 
       _ <- symbol "."
       _ <- symbol "["
@@ -177,7 +180,27 @@ parseNonOptSlice =
       _ <- symbol ":"
       f2 <- integer
       _ <- symbol "]"
-      return (Slice f1 f2)
+      return (Slice (Just f1) (Just f2))
+
+parseSliceFirstInt :: Parser Filter 
+parseSliceFirstInt = 
+    do 
+      _ <- symbol "."
+      _ <- symbol "["
+      f1 <- integer -- TODO: add optional handling
+      _ <- symbol ":"
+      _ <- symbol "]"
+      return (Slice (Just f1) Nothing)
+
+parseSliceSecondInt :: Parser Filter 
+parseSliceSecondInt = 
+    do 
+      _ <- symbol "."
+      _ <- symbol "["
+      _ <- symbol ":"
+      f2 <- integer -- TODO: add optional handling
+      _ <- symbol "]"
+      return (Slice Nothing (Just f2))
 
 parseOptSlice :: Parser Filter 
 parseOptSlice = 

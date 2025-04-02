@@ -15,9 +15,20 @@ compile (SimpleValConstr j) _ = return [j]
 compile (ArrValConst Nothing) _ = return []
 compile (ArrValConst (Just a)) inp = (compile a inp) >>= (\resultJsonArray -> return [JArray (resultJsonArray)] )
 compile Identity inp = return [inp]
-compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where
-        k1' = if k1 < 0 then k1 + (length arr) else k1
-        k2' = if k2 < 0 then k2 + (length arr) else k2
+compile (Slice k1 k2) (JString s) = return [JString (drop k1' (take k2' s))] where
+        k1' = case k1 of 
+            Nothing -> 0
+            (Just x) -> if x < 0 then x + (length s) else x
+        k2' = case k2 of 
+            Nothing -> (length s)
+            (Just x) -> if x < 0 then x + (length s) else x
+compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where -- TODO: horrible code duplication
+        k1' = case k1 of 
+            Nothing -> 0
+            (Just x) -> if x < 0 then x + (length arr) else x
+        k2' = case k2 of 
+            Nothing -> (length arr)
+            (Just x) -> if x < 0 then x + (length arr) else x
 compile (Index k) (JArray arr) 
     | k >= length arr = return [JNull]
     | k >= 0 = return [arr !! k ] -- just element at position k

@@ -10,7 +10,7 @@ data Filter = Identity
         | Iterator (Maybe Filter)
         | OptIterator Filter
         | Index Int
-        | Slice Int Int
+        | Slice (Maybe Int) (Maybe Int)
         | OptSlice Filter
         | SimpleValConstr JSON 
         | ObjValConstr [(String, Filter)] 
