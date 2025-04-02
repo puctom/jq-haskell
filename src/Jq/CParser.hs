@@ -135,9 +135,17 @@ parseNonEmptyIterator =
     do 
       _ <- symbol "."
       _ <- symbol "["
-      f <- parseFilter -- <|> parseIndex
+      f <- parseIndices <|> parseIndex -- TODO: here should more generic
       _ <- symbol "]"
       return (Iterator (Just f))
+
+parseIndices :: Parser Filter 
+parseIndices = 
+  do 
+    f <- parseIndex 
+    _ <- symbol "," 
+    f2 <- parseIndices <|> parseIndex
+    return (Comma f f2)    
 
 parseEmptyIterator :: Parser Filter 
 parseEmptyIterator = 
