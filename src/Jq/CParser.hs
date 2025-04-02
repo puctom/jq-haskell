@@ -4,7 +4,8 @@ import Parsing.Parsing
 import Jq.Filters
 import Parsing.Utils (stringAtom)
 import Debug.Trace (trace)
-import Jq.JParser (parseJSON)
+import Jq.JParser (parseJNull, parseJBool, parseJString, parseJNumber)
+import Jq.Json (JSON)
 
 
 {-
@@ -135,17 +136,10 @@ parseNonEmptyIterator =
     do 
       _ <- symbol "."
       _ <- symbol "["
-      f <- parseIndices <|> parseIndex -- TODO: here should more generic
+      f <- parseFilter <|> parseIndex -- TODO: here should more generic
       _ <- symbol "]"
       return (Iterator (Just f))
-
-parseIndices :: Parser Filter 
-parseIndices = 
-  do 
-    f <- parseIndex 
-    _ <- symbol "," 
-    f2 <- parseIndices <|> parseIndex
-    return (Comma f f2)    
+   
 
 parseEmptyIterator :: Parser Filter 
 parseEmptyIterator = 
@@ -196,10 +190,31 @@ parseOptIterator =
 
 -- parseValConstr :: Parser Filter 
 -- parseValConstr = 
---   do
---     j <- parseJSON
---     return (ValConstr j)
+--   j <- SimpleValConstr JSON 
+--         | ObjValConstr [(String, Filter)] 
+--         | ArrValConst Filter
 
+parseSimpleVal :: Parser Filter 
+parseSimpleVal = 
+  do
+    j <- parseJNull <|> parseJBool <|> parseJString <|> parseJNumber
+    return (SimpleValConstr j)
+
+parseArrayVal :: Parser Filter 
+parseArrayVal = do 
+                    _ <- symbol "[" 
+                    e1 <- parseFilter
+                    _ <- symbol "]"
+                    return (ArrValConst (Just e1))
+            <|> 
+                do 
+                    _ <- symbol "[" 
+                    _ <- symbol "]"
+                    return (ArrValConst Nothing)
+
+
+parseValConstr :: Parser Filter 
+parseValConstr = parseSimpleVal
 
 parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
@@ -211,12 +226,12 @@ parsePipeLevel :: Parser Filter
 parsePipeLevel =  parsePipe <|> parseNonPipe  
 
 parseNonPipe :: Parser Filter 
-parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseIndex <|> parseIdentity -- <|> parseValConstr
+parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
   [] -> Left "No filters provided"
-  h : _ ->
+  h : _  ->
     case parse parseFilter h of
       [(v, out)] -> case out of
         [] -> Right (trace ("Parsed as follows:\n " ++ show v) ConfigC v)

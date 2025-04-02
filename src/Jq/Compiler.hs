@@ -11,6 +11,9 @@ compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show
 
 compile :: Filter -> JProgram [JSON]
 -- compile (ValConstr v) inp = return [v]
+compile (SimpleValConstr j) _ = return [j]
+compile (ArrValConst Nothing) inp = return []
+compile (ArrValConst (Just a)) inp = compile a inp
 compile Identity inp = return [inp]
 compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where
         k1' = if k1 < 0 then k1 + (length arr) else k1

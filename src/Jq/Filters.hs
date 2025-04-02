@@ -12,7 +12,9 @@ data Filter = Identity
         | Index Int
         | Slice Int Int
         | OptSlice Filter
-        | ValConstr Filter
+        | SimpleValConstr JSON 
+        | ObjValConstr [(String, Filter)] 
+        | ArrValConst (Maybe Filter)
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -27,7 +29,9 @@ instance Show Filter where
   show (Iterator Nothing) = "  " ++ "FIterS(/" ++ ".[]" ++ "/FIterE)"  ++ "  "
   show (Iterator (Just f)) = "  " ++ "FIterS(/" ++ ".[ " ++ (show f) ++ " ]" ++ "/FIterE)"  ++ "  "
   show (OptIterator f) = "  " ++ "FIter?S(/" ++ show f ++ "/FIterE)"  ++ "  "
-  show (ValConstr j) = " json: " ++ show j ++ "  "
+  show (SimpleValConstr j) = "  simpleJSON: " ++ show j ++ "  "
+  show (ObjValConstr f) = " objectJSON: " ++ (concatMap (\(x,y) -> show x ++ ": "  ++show y) f) ++ "  "
+  show (ArrValConst f) = " arrJSON: " ++ (show f) ++ "  "
 instance Eq Filter where
   Identity == Identity = True
   (StringIndexing s1) == (StringIndexing s2) = s1 == s2
