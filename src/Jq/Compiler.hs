@@ -36,14 +36,17 @@ compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] w
         k2' = case k2 of
             Nothing -> (length arr)
             (Just x) -> if x < 0 then x + (length arr) else x
+compile (Slice _ _) JNull = return [JNull]
 compile (Index k) (JArray arr)
     | k >= length arr = return [JNull]
     | k >= 0 = return [arr !! k ] -- just element at position k
     | k >= -(length arr) = return [arr !! (k + length arr) ]
     | otherwise = return [JNull] -- too much negative
+compile (Index _) JNull = return [JNull]
 compile (Index _) _ = Left "Cannot apply index to non-arary"
 compile (OptSlice f) (JArray arr) = compileTrace f (JArray arr)
 compile (OptSlice f) (JString arr) = compileTrace f (JString arr)
+compile (OptSlice _) JNull = return [JNull]
 compile (OptSlice _) _ = return []
 -- compile (Iterator (Just (Index k))) (JArray arr) - REPLACED
 --     | k >= length arr = return [JNull]
@@ -52,7 +55,9 @@ compile (OptSlice _) _ = return []
 --     | otherwise = return [JNull] -- too much negative
 compile (OptIterator f) (JArray arr) = compileTrace f (JArray arr)
 compile (OptIterator (Iterator Nothing)) (JObject obj) = compileTrace (Iterator Nothing) (JObject obj)
+compile (OptIterator _) (JNull) = return []
 compile (OptIterator _) _ = return []
+compile (Iterator _) (JNull) = return [JNull]
 compile (Iterator Nothing) (JArray arr) = return arr
 compile (Iterator (Just f)) (JArray arr) = compileTrace f (JArray arr)
 compile (Iterator Nothing) (JObject obj) = return (map snd obj)
