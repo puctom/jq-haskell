@@ -19,7 +19,7 @@ compile (ObjValConstr arr) inp = case entries of
                                     where entries = traverse (\(key, filt) -> case compile filt inp of
                                                                 Left x -> Left x
                                                                 Right y -> Right (key, head y) ) arr
-compile (ArrValConst Nothing) _ = return []
+compile (ArrValConst Nothing) _ = return ([JArray []])
 compile (ArrValConst (Just a)) inp = (compile a inp) >>= (\resultJsonArray -> return [JArray (resultJsonArray)] )
 compile Identity inp = return [inp]
 compile (Slice k1 k2) (JString s) = return [JString (drop k1' (take k2' s))] where
