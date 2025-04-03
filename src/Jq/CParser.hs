@@ -54,7 +54,7 @@ parseNonOptionalStringIndexing = parseGenStringIndex <|> parseHalfGenStringIndex
 parseOptionalStringIndexing :: Parser Filter
 parseOptionalStringIndexing = do
     f <- parseNonOptionalStringIndexing
-    _ <- char '?'
+    _ <- symbol "?"
     return (OptStringIndexing f)
 
 parseGenStringIndex :: Parser Filter
@@ -73,7 +73,7 @@ parseOptHalfGenStringIndex :: Parser Filter
 parseOptHalfGenStringIndex =
   do
     f <- parseHalfGenStringIndex
-    _ <- char '?'
+    _ <- symbol "?"
     return (OptStringIndexing f)
 
 
@@ -206,7 +206,7 @@ parseOptSlice :: Parser Filter
 parseOptSlice =
   do
     f <- parseNonOptSlice
-    _ <- char '?'
+    _ <- symbol "?"
     return (OptSlice f)
 
 
@@ -217,7 +217,7 @@ parseOptIterator :: Parser Filter
 parseOptIterator =
   do
     f <- parseNonEmptyIterator <|> parseEmptyIterator
-    _ <- char '?'
+    _ <- symbol "?"
     return (OptIterator f)
 
 parseSimpleVal :: Parser Filter

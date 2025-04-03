@@ -43,6 +43,7 @@ compile (Index k) (JArray arr)
     | otherwise = return [JNull] -- too much negative
 compile (Index _) _ = Left "Cannot apply index to non-arary"
 compile (OptSlice f) (JArray arr) = compileTrace f (JArray arr)
+compile (OptSlice f) (JString arr) = compileTrace f (JString arr)
 compile (OptSlice _) _ = return []
 -- compile (Iterator (Just (Index k))) (JArray arr) - REPLACED
 --     | k >= length arr = return [JNull]
