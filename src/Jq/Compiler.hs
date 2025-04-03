@@ -12,24 +12,31 @@ compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show
 compile :: Filter -> JProgram [JSON]
 -- compile (ValConstr v) inp = return [v]
 compile (SimpleValConstr j) _ = return [j]
+compile (ObjValConstr []) _ = return [JObject []]
+compile (ObjValConstr arr) inp = case entries of
+                                        Left x -> Left x
+                                        Right y -> return [JObject y]
+                                    where entries = traverse (\(key, filt) -> case compile filt inp of
+                                                                Left x -> Left x
+                                                                Right y -> Right (key, head y) ) arr
 compile (ArrValConst Nothing) _ = return []
 compile (ArrValConst (Just a)) inp = (compile a inp) >>= (\resultJsonArray -> return [JArray (resultJsonArray)] )
 compile Identity inp = return [inp]
 compile (Slice k1 k2) (JString s) = return [JString (drop k1' (take k2' s))] where
-        k1' = case k1 of 
+        k1' = case k1 of
             Nothing -> 0
             (Just x) -> if x < 0 then x + (length s) else x
-        k2' = case k2 of 
+        k2' = case k2 of
             Nothing -> (length s)
             (Just x) -> if x < 0 then x + (length s) else x
 compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where -- TODO: horrible code duplication
-        k1' = case k1 of 
+        k1' = case k1 of
             Nothing -> 0
             (Just x) -> if x < 0 then x + (length arr) else x
-        k2' = case k2 of 
+        k2' = case k2 of
             Nothing -> (length arr)
             (Just x) -> if x < 0 then x + (length arr) else x
-compile (Index k) (JArray arr) 
+compile (Index k) (JArray arr)
     | k >= length arr = return [JNull]
     | k >= 0 = return [arr !! k ] -- just element at position k
     | k >= -(length arr) = return [arr !! (k + length arr) ]

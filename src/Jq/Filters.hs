@@ -10,10 +10,11 @@ data Filter = Identity
         | Iterator (Maybe Filter)
         | OptIterator Filter
         | Index Int
-        | Slice (Maybe Int) (Maybe Int)
+        | Slice (Maybe Int) (Maybe Int) 
         | OptSlice Filter
         | SimpleValConstr JSON 
-        | ObjValConstr [(String, Filter)] 
+        | ObjValConstr [(String, Filter)]
+        -- | ObjEntryConst 
         | ArrValConst (Maybe Filter)
 
 instance Show Filter where
@@ -30,8 +31,9 @@ instance Show Filter where
   show (Iterator (Just f)) = "  " ++ "FIterS(/" ++ ".[ " ++ (show f) ++ " ]" ++ "/FIterE)"  ++ "  "
   show (OptIterator f) = "  " ++ "FIter?S(/" ++ show f ++ "/FIterE)"  ++ "  "
   show (SimpleValConstr j) = "  simpleJSON: " ++ show j ++ "  "
-  show (ObjValConstr f) = " objectJSON: " ++ (concatMap (\(x,y) -> show x ++ ": "  ++show y) f) ++ "  "
+  show (ObjValConstr f) = " objectJSON: " ++ show f ++ "  "
   show (ArrValConst f) = " arrJSON: " ++ (show f) ++ "  "
+
 instance Eq Filter where
   Identity == Identity = True
   (StringIndexing s1) == (StringIndexing s2) = s1 == s2
