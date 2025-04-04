@@ -102,7 +102,7 @@ parseSimpleStringIndex =
 parsePipe :: Parser Filter
 parsePipe =
     do
-      f1 <- parseNonPipe -- level down
+      f1 <- parseCommaLevel -- level down
       _ <- token (char '|')
       f2 <- parseFilter -- all OR same level
       return (Pipe f1 f2)
@@ -135,9 +135,9 @@ parseCommaIndexing =
 parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
 parseComma =
     do
-      f1 <- parsePipeLevel -- level down 
+      f1 <- parseNonComma -- level down 
       _ <- token (char ',')
-      f2 <- parseFilter -- all 
+      f2 <- parseCommaLevel -- all 
       return (Comma f1 f2)
 
 parseNonEmptyIterator :: Parser Filter
@@ -274,13 +274,13 @@ parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
 
 parseFilter :: Parser Filter
-parseFilter =  parseComma <|> parsePipeLevel
+parseFilter =  parsePipe <|> parseCommaLevel
 
-parsePipeLevel :: Parser Filter
-parsePipeLevel =  parsePipe <|> parseNonPipe
+parseCommaLevel :: Parser Filter
+parseCommaLevel =  parseComma <|> parseNonComma
 
-parseNonPipe :: Parser Filter
-parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
+parseNonComma :: Parser Filter
+parseNonComma = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
