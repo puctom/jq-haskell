@@ -21,11 +21,6 @@ encodeUnicode c
 data JSON =
      JNull | JNumber Double | JString String | JBool Bool | JArray [JSON] | JObject [(String, JSON)]
 
-
-showLines :: JSON -> [String]
-showLines (JArray js) = (["[\n"] ++ map (\x -> concatMap (\y -> "  " ++ y) (showLines x) ++ ",\n") js ++ ["]"])
-showLines x = [show x]
-
 showWithIndent :: Int -> JSON -> String
 showWithIndent n (JArray []) = "[]"
 showWithIndent n (JArray js) = "[\n" ++ intercalate ",\n" (map (\e -> nestedIndent ++ e) indentedElems) ++ "\n" ++ currentIndent ++ "]" where 

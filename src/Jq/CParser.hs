@@ -262,6 +262,11 @@ parseObjVal = do
                     _ <- symbol "}"
                     return (ObjValConstr [])
 
+parseRecDescent :: Parser Filter
+parseRecDescent = do
+                    _ <- symbol ".."
+                    return (RecDescent)
+
 parseValConstr :: Parser Filter
 parseValConstr = parseSimpleVal <|> parseArrayVal <|> parseObjVal
 
@@ -275,7 +280,7 @@ parsePipeLevel :: Parser Filter
 parsePipeLevel =  parsePipe <|> parseNonPipe
 
 parseNonPipe :: Parser Filter
-parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseIdentity -- <|> parseValConstr
+parseNonPipe = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

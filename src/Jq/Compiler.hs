@@ -10,7 +10,10 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
--- compile (ValConstr v) inp = return [v]
+compile (RecDescent) (JArray arr) = fmap ((JArray arr) :) (fmap concat ( (traverse (\x -> compile RecDescent x) arr)))
+compile (RecDescent) (JObject arr) =  fmap ((JObject arr) :) (fmap concat (traverse (\x -> compile RecDescent x) (map snd arr)))
+compile (RecDescent) (x) = return [x]
+                                                        -- (JSON -> Either String [JSON] ) -> [JSON] -> [[JSON]]
 compile (SimpleValConstr j) _ = return [j]
 compile (ObjValConstr []) _ = return [JObject []]
 compile (ObjValConstr arr) inp = case entries of

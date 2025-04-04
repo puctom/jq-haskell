@@ -14,7 +14,7 @@ data Filter = Identity
         | OptSlice Filter
         | SimpleValConstr JSON 
         | ObjValConstr [(String, Filter)]
-        -- | ObjEntryConst 
+        | RecDescent 
         | ArrValConst (Maybe Filter)
 
 instance Show Filter where
@@ -33,6 +33,7 @@ instance Show Filter where
   show (SimpleValConstr j) = "  simpleJSON: " ++ show j ++ "  "
   show (ObjValConstr f) = " objectJSON: " ++ show f ++ "  "
   show (ArrValConst f) = " arrJSON: " ++ (show f) ++ "  "
+  show (RecDescent) = "  " ++ "RecDescent" ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True
