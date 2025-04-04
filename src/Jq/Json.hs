@@ -27,10 +27,12 @@ showLines (JArray js) = (["[\n"] ++ map (\x -> concatMap (\y -> "  " ++ y) (show
 showLines x = [show x]
 
 showWithIndent :: Int -> JSON -> String
+showWithIndent n (JArray []) = "[]"
 showWithIndent n (JArray js) = "[\n" ++ intercalate ",\n" (map (\e -> nestedIndent ++ e) indentedElems) ++ "\n" ++ currentIndent ++ "]" where 
                          currentIndent = replicate (2*n) ' '
                          nestedIndent = replicate (2*(n+1)) ' '
                          indentedElems = map (\j -> showWithIndent (n+1) j)  js
+showWithIndent n (JObject []) = "{}"
 showWithIndent n (JObject es) = "{\n" ++ intercalate ",\n" (map (\(key, val) -> nestedIndent ++ "\"" ++ (concatMap encodeUnicode key) ++ "\": " ++ val) indentedElems) ++ "\n" ++ currentIndent ++ "}" where 
                          currentIndent = replicate (2*n) ' '
                          nestedIndent = replicate (2*(n+1)) ' '
