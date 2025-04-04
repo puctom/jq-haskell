@@ -20,18 +20,24 @@ encodeUnicode c
 data JSON =
      JNull | JNumber Double | JString String | JBool Bool | JArray [JSON] | JObject [(String, JSON)]
 
-mapInside :: [JSON] -> Int -> String 
-mapInside js n =  intercalate (",\n" ++ concat (replicate n "  ")) (map show js)
+
+showLines :: JSON -> [String]
+showLines (JArray js) = ["[\n"] ++ map (\x -> "  " ++ concat (showLines x) ++ ",\n") js ++ ["]"]
+showLines x = [show x]
+
+showWithIndent :: JSON -> String
+showWithIndent (JArray js) = concat (showLines (JArray js)) --Map (\x -> "  " ++ x)
+showWithIndent x = concat ( showLines x)
 
 instance Show JSON where
   show JNull   = "null"
   show (JNumber x)  = case properFraction x of
                       (n, 0.0) -> show (n :: Integer)  -- If there's no fractional part, show as an integer
-                      _        -> show x 
+                      _        -> show x
   show (JString x) = '"' : (concatMap encodeUnicode x) ++  "\""
   show (JBool x) = map toLower (show x)
   show (JArray []) = "[]"
-  show (JArray js) =  "[\n  " ++ (mapInside js 1)  ++ "\n]" -- fix nesting
+  show (JArray js) = showWithIndent (JArray js)  -- "[\n" ++ intercalate (",\n") (map (\x -> "  " ++ show x) js)  ++ "\n]" -- fix nesting
   show (JObject entries) = "{" ++ intercalate ", " (map (\(x, y) -> '"' :(concatMap encodeUnicode x) ++"\"" ++ ": " ++ (show y)) entries) ++ "}"
 
 
