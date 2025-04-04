@@ -3,6 +3,7 @@ import Data.Char (toLower, ord, isControl)
 import Data.List (intercalate)
 import GHC.OldList (sortOn)
 import Text.Printf
+import Debug.Trace (trace)
 
 encodeUnicode :: Char -> String
 encodeUnicode '\b' = "\\b"
@@ -22,12 +23,20 @@ data JSON =
 
 
 showLines :: JSON -> [String]
-showLines (JArray js) = ["[\n"] ++ map (\x -> "  " ++ concat (showLines x) ++ ",\n") js ++ ["]"]
+showLines (JArray js) = (["[\n"] ++ map (\x -> concatMap (\y -> "  " ++ y) (showLines x) ++ ",\n") js ++ ["]"])
 showLines x = [show x]
 
-showWithIndent :: JSON -> String
-showWithIndent (JArray js) = concat (showLines (JArray js)) --Map (\x -> "  " ++ x)
-showWithIndent x = concat ( showLines x)
+showWithIndent :: Int -> JSON -> String
+showWithIndent n (JArray js) = "[\n" ++ intercalate ",\n" (map (\e -> nestedIndent ++ e) indentedElems) ++ "\n" ++ currentIndent ++ "]" where 
+                         currentIndent = replicate (2*n) ' '
+                         nestedIndent = replicate (2*(n+1)) ' '
+                         indentedElems = map (\j -> showWithIndent (n+1) j)  js
+showWithIndent n (JObject es) = "{\n" ++ intercalate ",\n" (map (\(key, val) -> nestedIndent ++ "\"" ++ (concatMap encodeUnicode key) ++ "\": " ++ val) indentedElems) ++ "\n" ++ currentIndent ++ "}" where 
+                         currentIndent = replicate (2*n) ' '
+                         nestedIndent = replicate (2*(n+1)) ' '
+                         indentedElems = map (\(key, val) -> (key, showWithIndent (n+1) val))  es
+
+showWithIndent n x = (show x) 
 
 instance Show JSON where
   show JNull   = "null"
@@ -37,8 +46,9 @@ instance Show JSON where
   show (JString x) = '"' : (concatMap encodeUnicode x) ++  "\""
   show (JBool x) = map toLower (show x)
   show (JArray []) = "[]"
-  show (JArray js) = showWithIndent (JArray js)  -- "[\n" ++ intercalate (",\n") (map (\x -> "  " ++ show x) js)  ++ "\n]" -- fix nesting
-  show (JObject entries) = "{" ++ intercalate ", " (map (\(x, y) -> '"' :(concatMap encodeUnicode x) ++"\"" ++ ": " ++ (show y)) entries) ++ "}"
+  show (JArray js) = showWithIndent 0 (JArray js)  -- "[\n" ++ intercalate (",\n") (map (\x -> "  " ++ show x) js)  ++ "\n]" -- fix nesting
+  show (JObject []) = "{}"
+  show (JObject entries) =  showWithIndent 0 (JObject entries) -- "{" ++ intercalate ", " (map (\(x, y) -> '"' :(concatMap encodeUnicode x) ++"\"" ++ ": " ++ (show y)) entries) ++ "}"
 
 
 instance Eq JSON where
