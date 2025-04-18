@@ -41,7 +41,7 @@ parseParentheses = do
   _ <- token (char '(')
   f <- parseFilter
   _ <- token (char ')')
-  return (Parentheses f)
+  return ((Parentheses f))
 
 parseStringIndexing :: Parser Filter
 parseStringIndexing = parseOptionalStringIndexing <|> parseNonOptionalStringIndexing
@@ -315,7 +315,7 @@ parseOr = do
 parseIfThenElse :: Parser Filter 
 parseIfThenElse = 
     do 
-      _ <- symbol "if"
+      _ <-  symbol "if"
       f1 <- parseFilter 
       _ <- symbol "then"
       f2 <- parseFilter 
@@ -396,7 +396,7 @@ parseOrLevel :: Parser Filter
 parseOrLevel = parseOr <|> parseNonBoolOp
 
 parseNonBoolOp :: Parser Filter
-parseNonBoolOp = parseNot <|> parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
+parseNonBoolOp = parseNot <|> parseSlice <|> parseIterator <|> parseStringIndexing  <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

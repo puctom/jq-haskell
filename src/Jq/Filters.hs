@@ -71,6 +71,18 @@ instance Eq Filter where
   (OptIterator f) == (OptIterator f') = f == f'
   (OptSlice f1) == (OptSlice f1' ) = f1 == f1'
   (TryCatch f1 f2) == (TryCatch f1' f2' ) = f1 == f1' && (f2 == f2')
+  (And f1 f2) == (And f1' f2') = f1 == f1' && (f2 == f2')
+  (Or f1 f2) == (Or f1' f2') = f1 == f1' && (f2 == f2')
+  (IfThenElse f1 f2 f3) == (IfThenElse f1' f2' f3') = f1 == f1' && (f2 == f2') && f3 == f3'
+  (Eq f1 f2) == (Eq f1' f2')  = f1 == f1' && (f2 == f2')
+  (Neq f1 f2) == (Neq f1' f2')  = f1 == f1' && (f2 == f2')
+  (Smaller f1 f2) == (Smaller f1' f2')  = f1 == f1' && (f2 == f2')
+  (SmallerEq f1 f2) == (SmallerEq f1' f2')  = f1 == f1' && (f2 == f2')
+  (Greater f1 f2) == (Greater f1' f2')  = f1 == f1' && (f2 == f2')
+  (GreaterEq f1 f2) == (GreaterEq f1' f2')  = f1 == f1' && (f2 == f2')
+  (SimpleValConstr j) ==   (SimpleValConstr j') = j == j'
+  (ObjValConstr f) == (ObjValConstr f') = f == f' 
+  (ArrValConst f) == (ArrValConst f') = f == f' 
   _ == _ = False
 
 
