@@ -79,16 +79,19 @@ parseOptHalfGenStringIndex =
 
 parseHalfGenStringIndex :: Parser Filter
 parseHalfGenStringIndex =
-    do
-    _ <- space
-    _ <- char '.'
-    _ <- char '\"'
-    k <- (many stringAtom)
-    _ <- char '\"'
-    return (StringIndexing k)
+  parseEscapedStringIndex
   <|>
     parseSimpleStringIndex
 
+parseEscapedStringIndex :: Parser Filter 
+parseEscapedStringIndex = 
+    do
+      _ <- space
+      _ <- char '.'
+      _ <- char '\"'
+      k <- (many stringAtom)
+      _ <- char '\"'
+      return (StringIndexing k)
 
 parseSimpleStringIndex :: Parser Filter
 parseSimpleStringIndex =
@@ -124,13 +127,25 @@ parseStringPipe =
       return (Pipe f1 f2)
 
 parseCommaIndexing :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
-parseCommaIndexing =
+parseCommaIndexing = parseCommaIndexIndexing <|> parseCommaKeyIndexing
+
+parseCommaIndexIndexing :: Parser Filter
+parseCommaIndexIndexing =
     do
       f1 <- parseIndex -- level down 
       _ <- token (char ',')
-      f2 <- parseCommaIndexing -- all 
+      f2 <- parseCommaIndexIndexing -- all 
       return (Comma f1 f2)
     <|> parseIndex
+
+parseCommaKeyIndexing :: Parser Filter
+parseCommaKeyIndexing =
+    do
+      f1 <- parseKey -- level down 
+      _ <- token (char ',')
+      f2 <- parseCommaKeyIndexing -- all 
+      return (Comma f1 f2)
+    <|> parseKey
 
 parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
 parseComma =
@@ -164,6 +179,14 @@ parseIndex =
     do
       k <- integer
       return (Index k)
+parseKey :: Parser Filter
+parseKey =
+    do    
+      _ <- char '\"'
+      k <- (many stringAtom)
+      _ <- char '\"'
+      return (StringIndexing k)
+
 
 parseSlice :: Parser Filter
 parseSlice = parseOptSlice <|> parseNonOptSlice

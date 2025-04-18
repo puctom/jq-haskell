@@ -59,6 +59,7 @@ compile (Iterator (Just f)) (JNull) = compileTrace f (JNull)
 compile (Iterator Nothing) (JArray arr) = return arr
 compile (Iterator (Just f)) (JArray arr) = compileTrace f (JArray arr)
 compile (Iterator Nothing) (JObject obj) = return (map snd obj)
+compile (Iterator (Just f)) (JObject obj) = compileTrace f (JObject obj)
 compile (OptStringIndexing s) (JObject a) = compileTrace s (JObject a) -- TODO: would be better not to recreate JObject
 compile (OptStringIndexing _) JNull = return [JNull]
 compile (OptStringIndexing _) _ = return []
