@@ -335,6 +335,40 @@ parseEqualityFilters = do
   _ <- symbol "!="
   f2 <- parseFilter
   return (Neq f1 f2)
+  <|> parseCompOperators 
+
+
+parseCompOperators :: Parser Filter 
+parseCompOperators = parseSmaller <|> parseSmallerEq <|> parseGreater <|> parseGreaterEq 
+
+parseSmaller :: Parser Filter
+parseSmaller = do 
+  f1 <- parseNonComparison
+  _ <- symbol "<"
+  f2 <- parseFilter 
+  return (Smaller f1 f2)
+
+parseSmallerEq :: Parser Filter
+parseSmallerEq = do 
+  f1 <- parseNonComparison
+  _ <- symbol "<="
+  f2 <- parseFilter 
+  return (SmallerEq f1 f2)
+
+parseGreater :: Parser Filter
+parseGreater = do 
+  f1 <- parseNonComparison
+  _ <- symbol ">"
+  f2 <- parseFilter 
+  return (Greater f1 f2)
+
+parseGreaterEq :: Parser Filter
+parseGreaterEq = do 
+  f1 <- parseNonComparison
+  _ <- symbol ">="
+  f2 <- parseFilter 
+  return (GreaterEq f1 f2)
+
 
 
 parseValConstr :: Parser Filter

@@ -12,6 +12,42 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
+compile (Smaller f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn < yn))
+                                    _ -> return (JBool False)
+compile (SmallerEq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn <= yn))
+                                    _ -> return (JBool False)
+compile (Greater f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn > yn))
+                                    _ -> return (JBool False)
+compile (GreaterEq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn >= yn))
+                                    _ -> return (JBool False)
 compile (Eq f1 f2) inp = do
                             xs <- (compile f1 inp)
                             ys <- (compile f2 inp) 

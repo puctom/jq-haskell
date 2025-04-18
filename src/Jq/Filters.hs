@@ -23,6 +23,10 @@ data Filter = Identity
         | IfThenElse Filter Filter Filter
         | Eq Filter Filter
         | Neq Filter Filter
+        | Smaller Filter Filter
+        | SmallerEq Filter Filter
+        | Greater Filter Filter
+        | GreaterEq Filter Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -48,6 +52,10 @@ instance Show Filter where
   show (IfThenElse f1 f2 f3) = "  " ++ " If(" ++ (show f1) ++") Then("  ++ (show f2) ++ ") Else(" ++ (show f3)  ++ ")  " 
   show (Eq f1 f2) = " Eq: " ++ (show f1) ++ "==" ++ (show f2) ++ "  "
   show (Neq f1 f2) = " Neq: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
+  show (Smaller f1 f2) = " Smaller: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
+  show (SmallerEq f1 f2) = " SmallerEq: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
+  show (Greater f1 f2) = " Greater: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
+  show (GreaterEq f1 f2) = " GreaterEq: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True
