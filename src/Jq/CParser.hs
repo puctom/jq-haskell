@@ -328,12 +328,12 @@ parseEqualityFilters :: Parser Filter
 parseEqualityFilters = do 
   f1 <- parseRegFilter 
   _ <- symbol "=="
-  f2 <- parseRegFilter
+  f2 <- parseFilter
   return (Eq f1 f2)
   <|> do
   f1 <- parseRegFilter 
   _ <- symbol "!="
-  f2 <- parseRegFilter
+  f2 <- parseFilter
   return (Neq f1 f2)
 
 
