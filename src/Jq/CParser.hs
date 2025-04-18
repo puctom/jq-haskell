@@ -324,6 +324,19 @@ parseIfThenElse =
       _ <- symbol "end"
       return (IfThenElse f1 f2 f3)
 
+parseEqualityFilters :: Parser Filter 
+parseEqualityFilters = do 
+  f1 <- parseRegFilter 
+  _ <- symbol "=="
+  f2 <- parseRegFilter
+  return (Eq f1 f2)
+  <|> do
+  f1 <- parseRegFilter 
+  _ <- symbol "!="
+  f2 <- parseRegFilter
+  return (Neq f1 f2)
+
+
 parseValConstr :: Parser Filter
 parseValConstr = parseSimpleVal <|> parseArrayVal <|> parseObjVal
 
@@ -331,7 +344,7 @@ parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
 
 parseFilter :: Parser Filter
-parseFilter = parseTryCatch <|> parseIfThenElse <|> parseRegFilter
+parseFilter = parseTryCatch <|> parseIfThenElse <|> parseEqualityFilters <|> parseRegFilter
 
 parseRegFilter :: Parser Filter
 parseRegFilter = parsePipe <|> parseCommaLevel

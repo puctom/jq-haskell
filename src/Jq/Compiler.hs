@@ -12,6 +12,20 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
+compile (Eq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                return $ JBool (x == y)
+compile (Neq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                return $ JBool (x /= y)
 compile (IfThenElse f1 f2 f3) inp = do 
                                 bools <- (compile f1 inp) 
                                 branchResults <- forM bools $ \cond ->

@@ -21,6 +21,8 @@ data Filter = Identity
         | And Filter Filter 
         | Or Filter Filter 
         | IfThenElse Filter Filter Filter
+        | Eq Filter Filter
+        | Neq Filter Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -44,6 +46,8 @@ instance Show Filter where
   show (And f1 f2) = "  " ++ " And(" ++ (show f1) ++", "  ++ (show f2)  ++ ")  " 
   show (Or f1 f2) = "  " ++ " Or(" ++ (show f1) ++", "  ++ (show f2)  ++ ")  " 
   show (IfThenElse f1 f2 f3) = "  " ++ " If(" ++ (show f1) ++") Then("  ++ (show f2) ++ ") Else(" ++ (show f3)  ++ ")  " 
+  show (Eq f1 f2) = " Eq: " ++ (show f1) ++ "==" ++ (show f2) ++ "  "
+  show (Neq f1 f2) = " Neq: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True
