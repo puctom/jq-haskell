@@ -327,74 +327,60 @@ parseIfThenElse =
 parseEqualityFilters :: Parser Filter 
 parseEqualityFilters = do 
   f1 <- parseNonComparison 
-  _ <- symbol "=="
+  x <- operatorComp
   f2 <- parseAndLevel
-  return (Eq f1 f2)
-  <|> do
-  f1 <- parseNonComparison 
-  _ <- symbol "!="
-  f2 <- parseAndLevel
-  return (Neq f1 f2)
-  <|> parseCompOperators  
+  case x of 
+      "==" -> return (Eq f1 f2)
+      "!=" -> return (Neq f1 f2)
+      "<" -> return (Smaller f1 f2)
+      "<=" -> return (SmallerEq f1 f2)
+      ">" -> return (Greater f1 f2)
+      ">=" -> return (GreaterEq f1 f2)
+      _ -> empty 
   
 parseArithmeticOperators :: Parser Filter 
 parseArithmeticOperators = 
   do 
     f1 <- parseNonArithm 
-    _ <- symbol "+"
+    x <- operatorOp
     f2 <- parseFilter
-    return (Add f1 f2)
-  <|> 
-  do
-    f1 <- parseNonArithm 
-    _ <- symbol "-"
-    f2 <- parseFilter
-    return (Subtract f1 f2) 
-  <|> 
-  do
-    f1 <- parseNonArithm 
-    _ <- symbol "*"
-    f2 <- parseFilter
-    return (Multiply f1 f2) 
-  <|> 
-  do
-    f1 <- parseNonArithm 
-    _ <- symbol "/"
-    f2 <- parseFilter
-    return (Divide f1 f2) 
+    case x of 
+      "+" -> return (Add f1 f2)
+      "-" -> return (Subtract f1 f2)
+      _ -> empty 
 
 
 
-parseCompOperators :: Parser Filter 
-parseCompOperators = parseSmaller <|> parseSmallerEq <|> parseGreater <|> parseGreaterEq 
+-- parseCompOperators :: Parser Filter 
+-- parseCompOperators = parseSmaller <|> parseSmallerEq <|> parseGreater <|> parseGreaterEq 
 
-parseSmaller :: Parser Filter
-parseSmaller = do 
-  f1 <- parseNonComparison
-  _ <- symbol "<"
-  f2 <- parseFilter 
-  return (Smaller f1 f2)
+-- parseSmaller :: Parser Filter
+-- parseSmaller = do 
+--   f1 <- parseNonComparison
+--   _ <- symbol "<"
+--   f2 <- parseFilter 
+--   return (Smaller f1 f2)
 
-parseSmallerEq :: Parser Filter
-parseSmallerEq = do 
-  f1 <- parseNonComparison
-  _ <- symbol "<="
-  f2 <- parseFilter 
-  return (SmallerEq f1 f2)
+-- parseSmallerEq :: Parser Filter
+-- parseSmallerEq = do 
+--   f1 <- parseNonComparison
+--   _ <- symbol "<="
+--   f2 <- parseFilter 
+--   return (SmallerEq f1 f2)
 
-parseGreater :: Parser Filter
-parseGreater = do 
-  f1 <- parseNonComparison
-  _ <- symbol ">"
-  f2 <- parseFilter 
-  return (Greater f1 f2)
+-- parseGreater :: Parser Filter
+-- parseGreater = do 
+--   f1 <- parseNonComparison
+--   _ <- symbol ">"
+--   f2 <- parseFilter 
+--   return (Greater f1 f2)
 
-parseGreaterEq :: Parser Filter
-parseGreaterEq = do 
-  f1 <- parseNonComparison
-  _ <- symbol ">="
-  f2 <- parseFilter 
-  return (GreaterEq f1 f2)
+-- parseGreaterEq :: Parser Filter
+-- parseGreaterEq = do 
+--   f1 <- parseNonComparison
+--   _ <- symbol ">="
+--   f2 <- parseFilter 
+--   return (GreaterEq f1 f2)
 
 
 

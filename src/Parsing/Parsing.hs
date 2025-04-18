@@ -85,7 +85,7 @@ string (x:xs) = do char x
 
 ident :: Parser String
 ident = do x  <- lower
-           xs <- many (alphanum <|> char '_') 
+           xs <- many (alphanum <|> char '_')
            return (x:xs)
 
 anyIdent :: Parser String
@@ -123,6 +123,18 @@ doubWithSign = do
                   a <- doub
                   return (-a)
                <|> doub
+
+operatorComp :: Parser String
+operatorComp = do
+            xs <- (symbol "==" <|> symbol "!=" <|> symbol "<" <|> symbol "<="  <|> symbol ">" <|> symbol ">=") -- TODO: fix, allow for any string
+            return xs
+
+operatorOp :: Parser String
+operatorOp = do
+            _ <- space
+            xs <- (symbol "+" <|> symbol "-") -- TODO: fix, allow for any string
+            _ <- space
+            return xs
 
 -- Handling spacing
 
