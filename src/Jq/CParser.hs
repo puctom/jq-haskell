@@ -6,31 +6,6 @@ import Parsing.Utils (stringAtom)
 import Debug.Trace (trace)
 import Jq.JParser (parseJNull, parseJBool, parseJString, parseJNumber)
 
-{-
-Precedence of operators:
-Operator 	            Description
-x? 	                  Error Suppression
--x 	                  Negative
-*, /, % 	            Multiplication, Division, Modulo
-+, - 	                Addition, Subtraction
-==, !=, <, >,<=, >= 	Comparisons
-and 	                Boolean AND
-or 	                  Boolean OR
-=, |=, +=, -=, *=, /=, %= 	Update-assignment
-// 	                   Alternative
-, 	                   Comma
-| 	                    Pipe
-label $variable 	Labels
-try … catch … 	Try expression
-if … then … end 	Conditional expression
-foreach … as … (…) 	Loop expression
-reduce … as … (…) 	Reduce expression
-… as $variable 	Variable definition expression
-def … ; … 	Function expression
-
-
--}
-
 parseIdentity :: Parser Filter
 parseIdentity = do
   _ <- token . char $ '.'
@@ -124,7 +99,7 @@ parseStringPipe =
       f2 <- parseOptHalfGenStringIndex <|> parseHalfGenStringIndex
       return (Pipe f1 f2)
 
-parseCommaIndexing :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
+parseCommaIndexing :: Parser Filter
 parseCommaIndexing = 
     do
       f1 <- parseSingleIndex -- level down 
@@ -136,12 +111,12 @@ parseCommaIndexing =
 parseSingleIndex :: Parser Filter 
 parseSingleIndex = parseIndex <|> parseKey
 
-parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
+parseComma :: Parser Filter 
 parseComma =
     do
       f1 <- parseAndLevel -- level down 
       _ <- token (char ',')
-      f2 <- parseCommaLevel -- all 
+      f2 <- parseCommaLevel 
       return (Comma f1 f2)
 
 parseNonEmptyIterator :: Parser Filter
@@ -149,7 +124,7 @@ parseNonEmptyIterator =
     do
       _ <- symbol "."
       _ <- symbol "["
-      f <- parseCommaIndexing -- parseFilter <|> parseIndex -- TODO: here should more generic
+      f <- parseCommaIndexing
       _ <- symbol "]"
       return (Iterator (Just f))
 
@@ -195,7 +170,7 @@ parseSliceTwoInt =
     do
       _ <- symbol "."
       _ <- symbol "["
-      f1 <- integer -- can it be all filters???
+      f1 <- integer
       _ <- symbol ":"
       f2 <- integer
       _ <- symbol "]"
@@ -206,7 +181,7 @@ parseSliceFirstInt =
     do
       _ <- symbol "."
       _ <- symbol "["
-      f1 <- integer -- TODO: add optional handling
+      f1 <- integer
       _ <- symbol ":"
       _ <- symbol "]"
       return (Slice (Just f1) Nothing)
@@ -217,7 +192,7 @@ parseSliceSecondInt =
       _ <- symbol "."
       _ <- symbol "["
       _ <- symbol ":"
-      f2 <- integer -- TODO: add optional handling
+      f2 <- integer
       _ <- symbol "]"
       return (Slice Nothing (Just f2))
 
@@ -260,7 +235,7 @@ parseArrayVal = do
 parseObjEntry :: Parser (String, Filter)
 parseObjEntry =
   do
-    _ <- char '\"' -- apparently can be without it 
+    _ <- char '\"'
     k1 <- (many stringAtom)
     _ <- symbol "\""
     _ <- symbol ":"
@@ -346,51 +321,16 @@ parseArithmeticOperators =
     f2 <- parseFilter
     case x of 
       "+" -> return (Add f1 f2)
-      "-" -> return (Subtract f1 f2)
+      "-" -> return (Subtract f1 f2) -- TODO: fix the associavity
       "*" -> return (Multiply f1 f2)
       "/" -> return (Divide f1 f2)
       _ -> empty 
-
-
-
--- parseCompOperators :: Parser Filter 
--- parseCompOperators = parseSmaller <|> parseSmallerEq <|> parseGreater <|> parseGreaterEq 
-
--- parseSmaller :: Parser Filter
--- parseSmaller = do 
---   f1 <- parseNonComparison
---   _ <- symbol "<"
---   f2 <- parseFilter 
---   return (Smaller f1 f2)
-
--- parseSmallerEq :: Parser Filter
--- parseSmallerEq = do 
---   f1 <- parseNonComparison
---   _ <- symbol "<="
---   f2 <- parseFilter 
---   return (SmallerEq f1 f2)
-
--- parseGreater :: Parser Filter
--- parseGreater = do 
---   f1 <- parseNonComparison
---   _ <- symbol ">"
---   f2 <- parseFilter 
---   return (Greater f1 f2)
-
--- parseGreaterEq :: Parser Filter
--- parseGreaterEq = do 
---   f1 <- parseNonComparison
---   _ <- symbol ">="
---   f2 <- parseFilter 
---   return (GreaterEq f1 f2)
-
-
 
 parseValConstr :: Parser Filter
 parseValConstr = parseSimpleVal <|> parseArrayVal <|> parseObjVal
 
 parseIterator :: Parser Filter
-parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
+parseIterator = parseOptIterator <|> parseNonOptIterator
 
 parseFilter :: Parser Filter
 parseFilter = parseEqualityFilters <|> parseNonComparison

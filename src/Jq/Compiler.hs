@@ -13,119 +13,6 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
-compile (Subtract f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JNumber (xn - yn))
-                                    (JArray arr1, JArray arr2) -> return (JArray (filter (\el -> not (el `elem` arr2)) arr1))
-                                    _ -> return JNull
-compile (Add f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JNumber (xn + yn))
-                                    (JString xn, JString yn) -> return (JString (xn ++ yn))
-                                    (JArray arr1, JArray arr2) -> return (JArray (arr1 ++ arr2))
-                                    (JObject obj1, JObject obj2) -> return (JObject (removeDuplicateKeys(obj1 ++ obj2)))
-                                    _ -> return JNull
-compile (Multiply f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JNumber (xn * yn))
-                                    (JString yn, JNumber xn) -> return (JString (concat (replicate (truncate xn) yn)))
-                                    (JObject obj1, JObject obj2) -> return (JObject (removeDuplicateKeys(obj1 ++ obj2)))
-                                    _ -> return JNull
-compile (Divide f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JNumber (xn / yn))
-                                    _ -> return JNull
-compile (Smaller f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JBool (xn < yn))
-                                    _ -> return (JBool False)
-compile (SmallerEq f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JBool (xn <= yn))
-                                    _ -> return (JBool False)
-compile (Greater f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JBool (xn > yn))
-                                    _ -> return (JBool False)
-compile (GreaterEq f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                case (x, y) of 
-                                    (JNumber xn, JNumber yn) -> return (JBool (xn >= yn))
-                                    _ -> return (JBool False)
-compile (Eq f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                return $ JBool (x == y)
-compile (Neq f1 f2) inp = do
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                return $ JBool (x /= y)
-compile (IfThenElse f1 f2 f3) inp = do 
-                                bools <- (compile f1 inp) 
-                                branchResults <- forM bools $ \cond ->
-                                    case jsonToBoolean cond of
-                                    True  -> compile f2 inp
-                                    False -> compile f3 inp
-                                return (concat branchResults)
-compile (Or f1 f2) inp = do 
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                return $ JBool (jsonToBoolean x || jsonToBoolean y)
-compile (And f1 f2) inp = do 
-                            xs <- (compile f1 inp)
-                            ys <- (compile f2 inp) 
-                            return $ do                    -- list monad moment now
-                                x <- xs
-                                y <- ys
-                                return $ JBool (jsonToBoolean x && jsonToBoolean y)
 compile Not inp = return [JBool (not (jsonToBoolean inp))]
 compile (TryCatch f1 f2) inp = case compile f1 inp of
                                     Left x -> compile f2 (JString x)
@@ -133,7 +20,6 @@ compile (TryCatch f1 f2) inp = case compile f1 inp of
 compile (RecDescent) (JArray arr) = fmap ((JArray arr) :) (fmap concat ( (traverse (\x -> compile RecDescent x) arr)))
 compile (RecDescent) (JObject arr) =  fmap ((JObject arr) :) (fmap concat (traverse (\x -> compile RecDescent x) (map snd arr)))
 compile (RecDescent) (x) = return [x]
-                                                        -- (JSON -> Either String [JSON] ) -> [JSON] -> [[JSON]]
 compile (SimpleValConstr j) _ = return [j]
 compile (ObjValConstr []) _ = return [JObject []]
 compile (ObjValConstr arr) inp = case entries of
@@ -152,7 +38,7 @@ compile (Slice k1 k2) (JString s) = return [JString (drop k1' (take k2' s))] whe
         k2' = case k2 of
             Nothing -> (length s)
             (Just x) -> if x < 0 then x + (length s) else x
-compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where -- TODO: horrible code duplication
+compile (Slice k1 k2) (JArray arr) = return [JArray (drop k1' (take k2' arr))] where
         k1' = case k1 of
             Nothing -> 0
             (Just x) -> if x < 0 then x + (length arr) else x
@@ -183,7 +69,7 @@ compile (Iterator Nothing) (JArray arr) = return arr
 compile (Iterator (Just f)) (JArray arr) = compileTrace f (JArray arr)
 compile (Iterator Nothing) (JObject obj) = return (map snd obj)
 compile (Iterator (Just f)) (JObject obj) = compileTrace f (JObject obj)
-compile (OptStringIndexing s) (JObject a) = compileTrace s (JObject a) -- TODO: would be better not to recreate JObject
+compile (OptStringIndexing s) (JObject a) = compileTrace s (JObject a)
 compile (OptStringIndexing _) JNull = return [JNull]
 compile (OptStringIndexing _) _ = return []
 compile (StringIndexing s) (JObject a) = case map snd (filter (\(key, val) -> key == s) a) of
@@ -199,13 +85,7 @@ compile (Pipe f1 f2) inp = case (compileTrace f1 inp) of
                                     acc2 <- acc
                                     e2 <- compileTrace f2 val
                                     return (acc2 ++ e2)
-
-                                -- case acc of
-                                --                                 Left x -> Left x
-                                --                                 Right succArr ->  case (compile f2 val) of
-                                --                                     Left x -> Left x
-                                --                                     Right jsonListRes -> Right (succArr ++ jsonListRes)
-                                                                ) (Right []) arr
+                                 ) (Right []) arr
                             Left x -> Left x
 compile (Comma f1 f2) inp = do
                                 e1 <- compileTrace f1 inp
@@ -215,6 +95,119 @@ compile (Comma f1 f2) inp = do
                             -- compile f2 inp >>= (\e2 ->
                             --     return (e1 ++ e2)))
 compile (Parentheses f) inp = compileTrace f inp
+compile (Subtract f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do       -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn - yn))
+                                    (JArray arr1, JArray arr2) -> return (JArray (filter (\el -> not (el `elem` arr2)) arr1))
+                                    _ -> return JNull -- I don't know what to do in this situation
+compile (Add f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                 
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn + yn))
+                                    (JString xn, JString yn) -> return (JString (xn ++ yn))
+                                    (JArray arr1, JArray arr2) -> return (JArray (arr1 ++ arr2))
+                                    (JObject obj1, JObject obj2) -> return (JObject (removeDuplicateKeys(obj1 ++ obj2)))
+                                    _ -> return JNull
+compile (Multiply f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do         
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn * yn))
+                                    (JString yn, JNumber xn) -> return (JString (concat (replicate (truncate xn) yn)))
+                                    (JObject obj1, JObject obj2) -> return (JObject (removeDuplicateKeys(obj1 ++ obj2)))
+                                    _ -> return JNull
+compile (Divide f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do   
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn / yn))
+                                    _ -> return JNull
+compile (Smaller f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do  
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn < yn))
+                                    _ -> return (JBool False)
+compile (SmallerEq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do 
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn <= yn))
+                                    _ -> return (JBool False)
+compile (Greater f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn > yn))
+                                    _ -> return (JBool False)
+compile (GreaterEq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do      
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JBool (xn >= yn))
+                                    _ -> return (JBool False)
+compile (Eq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do  
+                                x <- xs
+                                y <- ys
+                                return $ JBool (x == y)
+compile (Neq f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do 
+                                x <- xs
+                                y <- ys
+                                return $ JBool (x /= y)
+compile (IfThenElse f1 f2 f3) inp = do 
+                                bools <- (compile f1 inp) 
+                                branchResults <- forM bools $ \cond ->
+                                    case jsonToBoolean cond of
+                                    True  -> compile f2 inp
+                                    False -> compile f3 inp
+                                return (concat branchResults)
+compile (Or f1 f2) inp = do 
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do  
+                                x <- xs
+                                y <- ys
+                                return $ JBool (jsonToBoolean x || jsonToBoolean y)
+compile (And f1 f2) inp = do 
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do  
+                                x <- xs
+                                y <- ys
+                                return $ JBool (jsonToBoolean x && jsonToBoolean y)
 compile _ _ = Left "Incorrect invocation"
 
 run :: JProgram [JSON] -> JSON -> Either String [JSON]
