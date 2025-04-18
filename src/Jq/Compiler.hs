@@ -4,6 +4,7 @@ import           Jq.Filters
 import           Jq.Json
 import Debug.Trace (trace)
 import Parsing.Utils (jsonToBoolean)
+import Control.Monad (forM)
 
 type JProgram a = JSON -> Either String a
 
@@ -11,6 +12,13 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
+compile (IfThenElse f1 f2 f3) inp = do 
+                                bools <- (compile f1 inp) 
+                                branchResults <- forM bools $ \cond ->
+                                    case jsonToBoolean cond of
+                                    True  -> compile f2 inp
+                                    False -> compile f3 inp
+                                return (concat branchResults)
 compile (Or f1 f2) inp = do 
                             xs <- (compile f1 inp)
                             ys <- (compile f2 inp) 

@@ -20,6 +20,7 @@ data Filter = Identity
         | Not 
         | And Filter Filter 
         | Or Filter Filter 
+        | IfThenElse Filter Filter Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -42,6 +43,7 @@ instance Show Filter where
   show (Not) = "  " ++ " Not ("  ++ ")  " 
   show (And f1 f2) = "  " ++ " And(" ++ (show f1) ++", "  ++ (show f2)  ++ ")  " 
   show (Or f1 f2) = "  " ++ " Or(" ++ (show f1) ++", "  ++ (show f2)  ++ ")  " 
+  show (IfThenElse f1 f2 f3) = "  " ++ " If(" ++ (show f1) ++") Then("  ++ (show f2) ++ ") Else(" ++ (show f3)  ++ ")  " 
 
 instance Eq Filter where
   Identity == Identity = True
