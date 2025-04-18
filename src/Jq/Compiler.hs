@@ -56,7 +56,9 @@ compile (OptSlice _) JNull = return [JNull]
 compile (OptSlice _) _ = return []
 compile (OptIterator f) (JArray arr) = compileTrace f (JArray arr)
 compile (OptIterator (Iterator Nothing)) (JObject obj) = compileTrace (Iterator Nothing) (JObject obj)
-compile (OptIterator (Iterator (Just f))) (JObject obj) = compileTrace (Iterator (Just f)) (JObject obj)
+compile (OptIterator (Iterator (Just f))) (JObject obj) = case compileTrace (Iterator (Just f)) (JObject obj) of 
+                                                            Left _ -> return [] 
+                                                            Right y -> return y
 compile (OptIterator (Iterator (Just f))) (JNull) = compileTrace f (JNull)
 compile (OptIterator _) _ = return []
 compile (Iterator (Just f)) (JNull) = compileTrace f (JNull)
