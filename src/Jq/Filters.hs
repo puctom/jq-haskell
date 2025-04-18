@@ -16,6 +16,7 @@ data Filter = Identity
         | ObjValConstr [(String, Filter)]
         | RecDescent 
         | ArrValConst (Maybe Filter)
+        | TryCatch Filter Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -34,6 +35,7 @@ instance Show Filter where
   show (ObjValConstr f) = " objectJSON: " ++ show f ++ "  "
   show (ArrValConst f) = " arrJSON: " ++ (show f) ++ "  "
   show (RecDescent) = "  " ++ "RecDescent" ++ "  "
+  show (TryCatch f1 f2) = "  " ++ "TryCatch try(" ++ (show f1) ++ ") catch(" ++ (show f2) ++ ")TC  "
 
 instance Eq Filter where
   Identity == Identity = True
@@ -47,6 +49,7 @@ instance Eq Filter where
   (Iterator f) == (Iterator f') = f == f'
   (OptIterator f) == (OptIterator f') = f == f'
   (OptSlice f1) == (OptSlice f1' ) = f1 == f1'
+  (TryCatch f1 f2) == (TryCatch f1' f2' ) = f1 == f1' && (f2 == f2')
   _ == _ = False
 
 

@@ -187,6 +187,13 @@ parseKey =
       _ <- char '\"'
       return (StringIndexing k)
 
+parseTryCatch :: Parser Filter 
+parseTryCatch = do
+  _ <- symbol "try"
+  f1 <- parseFilter
+  _ <- symbol "catch"
+  f2 <- parseFilter
+  return (TryCatch f1 f2)
 
 parseSlice :: Parser Filter
 parseSlice = parseOptSlice <|> parseNonOptSlice
@@ -304,7 +311,10 @@ parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
 
 parseFilter :: Parser Filter
-parseFilter =  parsePipe <|> parseCommaLevel
+parseFilter = parseTryCatch <|> parseRegFilter
+
+parseRegFilter :: Parser Filter
+parseRegFilter = parsePipe <|> parseCommaLevel
 
 parseCommaLevel :: Parser Filter
 parseCommaLevel =  parseComma <|> parseNonComma
