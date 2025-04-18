@@ -2,7 +2,6 @@ module Jq.Compiler where
 
 import           Jq.Filters
 import           Jq.Json
-import Debug.Trace (trace)
 import Parsing.Utils (jsonToBoolean)
 import Control.Monad (forM)
 import Jq.Utils (removeDuplicateKeys)
@@ -10,7 +9,7 @@ import Jq.Utils (removeDuplicateKeys)
 type JProgram a = JSON -> Either String a
 
 compileTrace :: Filter -> JProgram [JSON]
-compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
+compileTrace f inp = (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
 compile Not inp = return [JBool (not (jsonToBoolean inp))]
