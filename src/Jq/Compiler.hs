@@ -5,6 +5,7 @@ import           Jq.Json
 import Debug.Trace (trace)
 import Parsing.Utils (jsonToBoolean)
 import Control.Monad (forM)
+import Jq.Utils (removeDuplicateKeys)
 
 type JProgram a = JSON -> Either String a
 
@@ -12,6 +13,28 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
+compile (Subtract f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn - yn))
+                                    (JArray arr1, JArray arr2) -> return (JArray (filter (\el -> not (el `elem` arr2)) arr1))
+                                    _ -> return JNull
+compile (Add f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn + yn))
+                                    (JString xn, JString yn) -> return (JString (xn ++ yn))
+                                    (JArray arr1, JArray arr2) -> return (JArray (arr1 ++ arr2))
+                                    (JObject obj1, JObject obj2) -> return (JObject (removeDuplicateKeys(obj1 ++ obj2)))
+                                    _ -> return JNull
 compile (Smaller f1 f2) inp = do
                             xs <- (compile f1 inp)
                             ys <- (compile f2 inp) 

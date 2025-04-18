@@ -32,7 +32,9 @@ parseJString = fmap JString escapedString
 
 parseJNumber :: Parser JSON 
 parseJNumber = do 
+                    _ <- space
                     num <- rawNumber
+                    _ <- space
                     return (JNumber (read num)) 
 
 parseJArray :: Parser JSON 

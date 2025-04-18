@@ -335,7 +335,34 @@ parseEqualityFilters = do
   _ <- symbol "!="
   f2 <- parseFilter
   return (Neq f1 f2)
-  <|> parseCompOperators 
+  <|> parseCompOperators  
+  
+parseArithmeticOperators :: Parser Filter 
+parseArithmeticOperators = 
+  do 
+    f1 <- parseNonArithm 
+    _ <- symbol "+"
+    f2 <- parseFilter
+    return (Add f1 f2)
+  <|> 
+  do
+    f1 <- parseNonArithm 
+    _ <- symbol "-"
+    f2 <- parseFilter
+    return (Subtract f1 f2) 
+  <|> 
+  do
+    f1 <- parseNonArithm 
+    _ <- symbol "*"
+    f2 <- parseFilter
+    return (Multiply f1 f2) 
+  <|> 
+  do
+    f1 <- parseNonArithm 
+    _ <- symbol "/"
+    f2 <- parseFilter
+    return (Divide f1 f2) 
+
 
 
 parseCompOperators :: Parser Filter 
@@ -381,7 +408,10 @@ parseFilter :: Parser Filter
 parseFilter = parseEqualityFilters <|> parseNonComparison
 
 parseNonComparison :: Parser Filter
-parseNonComparison = parseTryCatch <|> parseIfThenElse <|> parseRegFilter
+parseNonComparison = parseArithmeticOperators <|> parseNonArithm 
+
+parseNonArithm :: Parser Filter
+parseNonArithm = parseTryCatch <|> parseIfThenElse <|> parseRegFilter
 
 parseRegFilter :: Parser Filter
 parseRegFilter = parsePipe <|> parseCommaLevel

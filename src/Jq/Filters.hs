@@ -27,6 +27,10 @@ data Filter = Identity
         | SmallerEq Filter Filter
         | Greater Filter Filter
         | GreaterEq Filter Filter
+        | Add Filter Filter
+        | Subtract Filter Filter
+        | Multiply Filter Filter
+        | Divide Filter Filter
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -56,6 +60,10 @@ instance Show Filter where
   show (SmallerEq f1 f2) = " SmallerEq: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
   show (Greater f1 f2) = " Greater: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
   show (GreaterEq f1 f2) = " GreaterEq: " ++ (show f1) ++ "!=" ++ (show f2) ++ "  "
+  show (Add f1 f2) = " Add: " ++ (show f1) ++ " + " ++ (show f2) ++ "  "
+  show (Subtract f1 f2) = " Subtract: " ++ (show f1) ++ " - " ++ (show f2) ++ "  "
+  show (Multiply f1 f2) = " Multiply: " ++ (show f1) ++ " * " ++ (show f2) ++ "  "
+  show (Divide f1 f2) = " Divide: " ++ (show f1) ++ " / " ++ (show f2) ++ "  "
 
 instance Eq Filter where
   Identity == Identity = True
