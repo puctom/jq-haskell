@@ -127,25 +127,16 @@ parseStringPipe =
       return (Pipe f1 f2)
 
 parseCommaIndexing :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
-parseCommaIndexing = parseCommaIndexIndexing <|> parseCommaKeyIndexing
-
-parseCommaIndexIndexing :: Parser Filter
-parseCommaIndexIndexing =
+parseCommaIndexing = 
     do
-      f1 <- parseIndex -- level down 
+      f1 <- parseSingleIndex -- level down 
       _ <- token (char ',')
-      f2 <- parseCommaIndexIndexing -- all 
+      f2 <- parseCommaIndexing -- all 
       return (Comma f1 f2)
-    <|> parseIndex
+    <|> parseSingleIndex
 
-parseCommaKeyIndexing :: Parser Filter
-parseCommaKeyIndexing =
-    do
-      f1 <- parseKey -- level down 
-      _ <- token (char ',')
-      f2 <- parseCommaKeyIndexing -- all 
-      return (Comma f1 f2)
-    <|> parseKey
+parseSingleIndex :: Parser Filter 
+parseSingleIndex = parseIndex <|> parseKey
 
 parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
 parseComma =
