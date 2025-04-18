@@ -328,12 +328,12 @@ parseEqualityFilters :: Parser Filter
 parseEqualityFilters = do 
   f1 <- parseNonComparison 
   _ <- symbol "=="
-  f2 <- parseFilter
+  f2 <- parseAndLevel
   return (Eq f1 f2)
   <|> do
   f1 <- parseNonComparison 
   _ <- symbol "!="
-  f2 <- parseFilter
+  f2 <- parseAndLevel
   return (Neq f1 f2)
   <|> parseCompOperators  
   
@@ -408,7 +408,7 @@ parseFilter :: Parser Filter
 parseFilter = parseEqualityFilters <|> parseNonComparison
 
 parseNonComparison :: Parser Filter
-parseNonComparison = parseArithmeticOperators <|> parseNonArithm 
+parseNonComparison = parseArithmeticOperators <|>  parseNonArithm 
 
 parseNonArithm :: Parser Filter
 parseNonArithm = parseTryCatch <|> parseIfThenElse <|> parseRegFilter
