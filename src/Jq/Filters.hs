@@ -91,6 +91,10 @@ instance Eq Filter where
   (SimpleValConstr j) ==   (SimpleValConstr j') = j == j'
   (ObjValConstr f) == (ObjValConstr f') = f == f' 
   (ArrValConst f) == (ArrValConst f') = f == f' 
+  (Add f1 f2) == (Neq f1' f2')  = f1 == f1' && (f2 == f2')
+  (Subtract f1 f2) == (Smaller f1' f2')  = f1 == f1' && (f2 == f2')
+  (Multiply f1 f2) == (SmallerEq f1' f2')  = f1 == f1' && (f2 == f2')
+  (Divide f1 f2) == (Greater f1' f2')  = f1 == f1' && (f2 == f2')
   _ == _ = False
 
 
