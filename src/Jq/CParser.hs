@@ -311,7 +311,7 @@ parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
 
 parseFilter :: Parser Filter
-parseFilter = parseTryCatch <|> parseRegFilter
+parseFilter =  parseRegFilter
 
 parseRegFilter :: Parser Filter
 parseRegFilter = parsePipe <|> parseCommaLevel
