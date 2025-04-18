@@ -5,8 +5,6 @@ import Jq.Filters
 import Parsing.Utils (stringAtom)
 import Debug.Trace (trace)
 import Jq.JParser (parseJNull, parseJBool, parseJString, parseJNumber)
-import Jq.Json (JSON)
-
 
 {-
 Precedence of operators:
@@ -180,7 +178,7 @@ parseKey =
 
 parseTryCatch :: Parser Filter 
 parseTryCatch = do
-  _ <- symbol "try"
+  _ <- trace("parsing try") symbol "try"
   f1 <- parseFilter
   _ <- symbol "catch"
   f2 <- parseFilter
@@ -279,7 +277,7 @@ parseObjEntry =
 
 parseObjVal :: Parser Filter
 parseObjVal = do
-                    _ <- trace ("parsing obj vlaue") (symbol "{")
+                    _ <- (symbol "{")
                     e1 <- parseObjEntry
                     elems <- many parseObjEntry
                     _ <- symbol "}"
@@ -307,7 +305,7 @@ parseIterator :: Parser Filter
 parseIterator = parseOptIterator <|> parseNonOptIterator -- TODO: refactor to reduce copy paste, abstract the optional ones
 
 parseFilter :: Parser Filter
-parseFilter =  parseRegFilter
+parseFilter = parseTryCatch <|> parseRegFilter
 
 parseRegFilter :: Parser Filter
 parseRegFilter = parsePipe <|> parseCommaLevel
