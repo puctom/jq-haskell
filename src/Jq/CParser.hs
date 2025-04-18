@@ -295,6 +295,11 @@ parseRecDescent = do
                     _ <- symbol ".."
                     return (RecDescent)
 
+parseNot :: Parser Filter 
+parseNot = do 
+  _ <- symbol "not"
+  return Not
+
 parseValConstr :: Parser Filter
 parseValConstr = parseSimpleVal <|> parseArrayVal <|> parseObjVal
 
@@ -311,7 +316,7 @@ parseCommaLevel :: Parser Filter
 parseCommaLevel =  parseComma <|> parseNonComma
 
 parseNonComma :: Parser Filter
-parseNonComma = parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
+parseNonComma = parseNot <|> parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of

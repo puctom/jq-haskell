@@ -17,6 +17,7 @@ data Filter = Identity
         | RecDescent 
         | ArrValConst (Maybe Filter)
         | TryCatch Filter Filter
+        | Not 
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -36,6 +37,7 @@ instance Show Filter where
   show (ArrValConst f) = " arrJSON: " ++ (show f) ++ "  "
   show (RecDescent) = "  " ++ "RecDescent" ++ "  "
   show (TryCatch f1 f2) = "  " ++ "TryCatch try(" ++ (show f1) ++ ") catch(" ++ (show f2) ++ ")TC  "
+  show (Not) = "  " ++ " Not ("  ++ ")  " 
 
 instance Eq Filter where
   Identity == Identity = True
