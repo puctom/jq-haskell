@@ -18,6 +18,8 @@ data Filter = Identity
         | ArrValConst (Maybe Filter)
         | TryCatch Filter Filter
         | Not 
+        | And Filter Filter 
+        | Or Filter Filter 
 
 instance Show Filter where
   show (Identity) = "  " ++ "FId" ++ "  "
@@ -38,9 +40,12 @@ instance Show Filter where
   show (RecDescent) = "  " ++ "RecDescent" ++ "  "
   show (TryCatch f1 f2) = "  " ++ "TryCatch try(" ++ (show f1) ++ ") catch(" ++ (show f2) ++ ")TC  "
   show (Not) = "  " ++ " Not ("  ++ ")  " 
+  show (And f1 f2) = "  " ++ " And(" ++ (show f1) ++", "  ++ (show f2)  ++ ")  " 
+  show (Or f1 f2) = "  " ++ " Or(" ++ (show f1) ++", "  ++ (show f2)  ++ ")  " 
 
 instance Eq Filter where
   Identity == Identity = True
+  Not == Not = True
   (StringIndexing s1) == (StringIndexing s2) = s1 == s2
   (Pipe f1 f2) == (Pipe f1' f2') = (f1 == f1') && (f2 == f2')
   (Comma f1 f2) == (Comma f1' f2') = (f1 == f1') && (f2 == f2')

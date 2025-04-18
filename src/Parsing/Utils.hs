@@ -2,6 +2,7 @@ module Parsing.Utils where
 
 import Parsing.Parsing
 import Data.Char (isDigit, isControl, digitToInt, chr, isHexDigit)
+import Jq.Json 
 
 -- Skip over, useful for conditional parsing
 skip :: Parser String
@@ -60,3 +61,8 @@ stringAtom = (sat regularStringChar) <|> (char '\\' *> escapeSequence)
 
 escapedString :: Parser String
 escapedString = char '"' *> (many stringAtom) <* char '"'
+
+jsonToBoolean :: JSON -> Bool 
+jsonToBoolean inp 
+    | inp == JNull || inp == JBool False = False
+    | otherwise = True

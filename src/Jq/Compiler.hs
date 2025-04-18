@@ -3,6 +3,7 @@ module Jq.Compiler where
 import           Jq.Filters
 import           Jq.Json
 import Debug.Trace (trace)
+import Parsing.Utils (jsonToBoolean)
 
 type JProgram a = JSON -> Either String a
 
@@ -10,7 +11,22 @@ compileTrace :: Filter -> JProgram [JSON]
 compileTrace f inp = trace ("Called compile with " ++ show f ++ " and: " ++ show inp) (compile f inp)
 
 compile :: Filter -> JProgram [JSON]
-compile (TryCatch f1 f2) inp = case compile f1 inp of 
+compile (Or f1 f2) inp = do 
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                return $ JBool (jsonToBoolean x || jsonToBoolean y)
+compile (And f1 f2) inp = do 
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                return $ JBool (jsonToBoolean x && jsonToBoolean y)
+compile Not inp = return [JBool (not (jsonToBoolean inp))]
+compile (TryCatch f1 f2) inp = case compile f1 inp of
                                     Left x -> compile f2 (JString x)
                                     Right y -> return y
 compile (RecDescent) (JArray arr) = fmap ((JArray arr) :) (fmap concat ( (traverse (\x -> compile RecDescent x) arr)))
@@ -56,8 +72,8 @@ compile (OptSlice _) JNull = return [JNull]
 compile (OptSlice _) _ = return []
 compile (OptIterator f) (JArray arr) = compileTrace f (JArray arr)
 compile (OptIterator (Iterator Nothing)) (JObject obj) = compileTrace (Iterator Nothing) (JObject obj)
-compile (OptIterator (Iterator (Just f))) (JObject obj) = case compileTrace (Iterator (Just f)) (JObject obj) of 
-                                                            Left _ -> return [] 
+compile (OptIterator (Iterator (Just f))) (JObject obj) = case compileTrace (Iterator (Just f)) (JObject obj) of
+                                                            Left _ -> return []
                                                             Right y -> return y
 compile (OptIterator (Iterator (Just f))) (JNull) = compileTrace f (JNull)
 compile (OptIterator _) _ = return []

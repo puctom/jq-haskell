@@ -139,7 +139,7 @@ parseSingleIndex = parseIndex <|> parseKey
 parseComma :: Parser Filter -- TODO: This is right associative. Question to TA: how to make it left associative?
 parseComma =
     do
-      f1 <- parseNonComma -- level down 
+      f1 <- parseAndLevel -- level down 
       _ <- token (char ',')
       f2 <- parseCommaLevel -- all 
       return (Comma f1 f2)
@@ -178,7 +178,7 @@ parseKey =
 
 parseTryCatch :: Parser Filter 
 parseTryCatch = do
-  _ <- trace("parsing try") symbol "try"
+  _ <- symbol "try"
   f1 <- parseFilter
   _ <- symbol "catch"
   f2 <- parseFilter
@@ -298,6 +298,20 @@ parseNot = do
   _ <- symbol "not"
   return Not
 
+parseAnd :: Parser Filter 
+parseAnd = do 
+  f1 <- parseOrLevel
+  _ <- symbol "and"
+  f2 <- parseFilter
+  return (And f1 f2)
+
+parseOr :: Parser Filter
+parseOr = do 
+  f1 <- parseNonBoolOp
+  _ <- symbol "or"
+  f2 <- parseFilter
+  return (Or f1 f2)
+
 parseValConstr :: Parser Filter
 parseValConstr = parseSimpleVal <|> parseArrayVal <|> parseObjVal
 
@@ -311,10 +325,16 @@ parseRegFilter :: Parser Filter
 parseRegFilter = parsePipe <|> parseCommaLevel
 
 parseCommaLevel :: Parser Filter
-parseCommaLevel =  parseComma <|> parseNonComma
+parseCommaLevel =  parseComma <|> parseAndLevel
 
-parseNonComma :: Parser Filter
-parseNonComma = parseNot <|> parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
+parseAndLevel :: Parser Filter
+parseAndLevel = parseAnd <|> parseOrLevel
+
+parseOrLevel :: Parser Filter
+parseOrLevel = parseOr <|> parseNonBoolOp
+
+parseNonBoolOp :: Parser Filter
+parseNonBoolOp = parseNot <|> parseSlice <|> parseIterator <|> parseStringIndexing <|> parseParentheses <|> parseValConstr <|> parseRecDescent <|> parseIdentity -- <|> parseValConstr
 
 parseConfig :: [String] -> Either String Config
 parseConfig s = case s of
