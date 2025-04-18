@@ -347,6 +347,8 @@ parseArithmeticOperators =
     case x of 
       "+" -> return (Add f1 f2)
       "-" -> return (Subtract f1 f2)
+      "*" -> return (Multiply f1 f2)
+      "/" -> return (Divide f1 f2)
       _ -> empty 
 
 

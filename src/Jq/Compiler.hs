@@ -35,6 +35,26 @@ compile (Add f1 f2) inp = do
                                     (JArray arr1, JArray arr2) -> return (JArray (arr1 ++ arr2))
                                     (JObject obj1, JObject obj2) -> return (JObject (removeDuplicateKeys(obj1 ++ obj2)))
                                     _ -> return JNull
+compile (Multiply f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn * yn))
+                                    (JString yn, JNumber xn) -> return (JString (concat (replicate (truncate xn) yn)))
+                                    (JObject obj1, JObject obj2) -> return (JObject (removeDuplicateKeys(obj1 ++ obj2)))
+                                    _ -> return JNull
+compile (Divide f1 f2) inp = do
+                            xs <- (compile f1 inp)
+                            ys <- (compile f2 inp) 
+                            return $ do                    -- list monad moment now
+                                x <- xs
+                                y <- ys
+                                case (x, y) of 
+                                    (JNumber xn, JNumber yn) -> return (JNumber (xn / yn))
+                                    _ -> return JNull
 compile (Smaller f1 f2) inp = do
                             xs <- (compile f1 inp)
                             ys <- (compile f2 inp) 

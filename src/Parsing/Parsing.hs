@@ -126,13 +126,15 @@ doubWithSign = do
 
 operatorComp :: Parser String
 operatorComp = do
-            xs <- (symbol "==" <|> symbol "!=" <|> symbol "<" <|> symbol "<="  <|> symbol ">" <|> symbol ">=") -- TODO: fix, allow for any string
+            _ <- space
+            xs <- (string "==" <|> string "!=" <|> string "<" <|> string "<="  <|> string ">" <|> string ">=") -- TODO: fix, allow for any string
+            _ <- space
             return xs
 
 operatorOp :: Parser String
 operatorOp = do
             _ <- space
-            xs <- (symbol "+" <|> symbol "-") -- TODO: fix, allow for any string
+            xs <- (string "+" <|> string "-" <|> string "*" <|> string "/") -- TODO: fix, allow for any string
             _ <- space
             return xs
 
