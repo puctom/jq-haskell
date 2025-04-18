@@ -247,6 +247,13 @@ parseObjEntry =
     _ <- symbol ":"
     f1 <- parseFilter
     return (k1, f1)
+    <|>
+  do
+    _ <- space
+    k1 <- anyIdent
+    _ <- symbol ":"
+    f1 <- parseFilter
+    return (k1, f1)
 
 
 parseObjVal :: Parser Filter
